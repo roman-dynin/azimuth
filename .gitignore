@@ -27,3 +27,6 @@ env/*.env
 
 # Local Docker data
 .docker
+
+# Prisma
+prisma/generated

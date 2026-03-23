@@ -1,0 +1,21 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Route {
+  id    Int    @id @default(autoincrement())
+  title String
+}
+
+model Waypoint {
+  id        Int  @id @default(autoincrement())
+  parentId Int?
+  routeId  Int
+  azimuth   Int
+  seconds   Int
+}
