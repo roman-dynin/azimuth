@@ -1,3 +1,3 @@
 export default defineEventHandler(() => {
-    return prisma.waypoint.findMany();
+  return prisma.waypoint.findMany()
 })

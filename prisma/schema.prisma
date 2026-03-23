@@ -13,9 +13,9 @@ model Route {
 }
 
 model Waypoint {
-  id        Int  @id @default(autoincrement())
+  id       Int  @id @default(autoincrement())
   parentId Int?
   routeId  Int
-  azimuth   Int
-  seconds   Int
+  azimuth  Int
+  seconds  Int
 }

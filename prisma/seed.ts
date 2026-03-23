@@ -1,61 +1,61 @@
-import "dotenv/config";
+import { PrismaPg } from '@prisma/adapter-pg'
 
-import { PrismaClient } from "./generated/client";
+import { PrismaClient } from './generated/client'
 
-import { PrismaPg } from "@prisma/adapter-pg";
+import 'dotenv/config'
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
+// eslint-disable-next-line node/prefer-global/process
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
 
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
-    const route = await prisma.route.create({
-        data: {
-            title: "Тест",
-        },
-    });
+  const route = await prisma.route.create({
+    data: {
+      title: 'Тест',
+    },
+  })
 
-    console.log(`Created route: ${route.title}`);
+  await prisma.waypoint.create({
+    data: {
+      routeId: route.id,
+      azimuth: 90,
+      seconds: 300,
+    },
+  })
 
-    await prisma.waypoint.create({
-        data: {
-            routeId: route.id,
-            azimuth: 90,
-            seconds: 300,
-        },
-    });
+  await prisma.waypoint.create({
+    data: {
+      routeId: route.id,
+      azimuth: 150,
+      seconds: 300,
+    },
+  })
 
-    await prisma.waypoint.create({
-        data: {
-            routeId: route.id,
-            azimuth: 150,
-            seconds: 300,
-        },
-    });
+  await prisma.waypoint.create({
+    data: {
+      routeId: route.id,
+      azimuth: 240,
+      seconds: 300,
+    },
+  })
 
-    await prisma.waypoint.create({
-        data: {
-            routeId: route.id,
-            azimuth: 240,
-            seconds: 300,
-        },
-    });
-
-    await prisma.waypoint.create({
-        data: {
-            routeId: route.id,
-            azimuth: 330,
-            seconds: 300,
-        },
-    });
+  await prisma.waypoint.create({
+    data: {
+      routeId: route.id,
+      azimuth: 330,
+      seconds: 300,
+    },
+  })
 }
 
 main()
-    .then(() => prisma.$disconnect())
-    .catch(async (e) => {
-        console.error(e);
+  .then(() => prisma.$disconnect())
+  .catch(async (e) => {
+    console.error(e)
 
-        await prisma.$disconnect();
+    await prisma.$disconnect()
 
-        process.exit(1);
-    });
+    // eslint-disable-next-line node/prefer-global/process
+    process.exit(1)
+  })
