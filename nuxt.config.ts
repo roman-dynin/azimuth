@@ -6,6 +6,8 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  ssr: false,
+
   modules: [
     '@nuxt/eslint',
   ],
