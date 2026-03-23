@@ -86,6 +86,7 @@ export default defineEventHandler(async () => {
       enrichedRoutes.push({
         id: route.id,
         title: route.title,
+        guideline: route.guideline,
         latLng: routeLatLng,
         waypoints: enrichedWaypoints,
       })
