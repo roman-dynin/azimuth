@@ -5,8 +5,6 @@ import type { EnrichedRoute } from '~~/types/api'
 
 import L from 'leaflet'
 
-import 'leaflet/dist/leaflet.css'
-
 const { data: routes } = await useFetch<EnrichedRoute[]>('/api/routes')
 
 const { data: spots } = await useFetch('/api/spots')
@@ -21,15 +19,15 @@ onMounted(() => {
   })
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
+    maxZoom: 18,
   }).addTo(map)
 
   routes.value!.forEach((route, routeIndex) => {
-    const coordinates = [route.latLng, ...route.waypoints.map(waypoint => waypoint.latLng)]
+    const latlngs = [route.latLng, ...route.waypoints.map(waypoint => waypoint.latLng)]
 
     const color = `rgb(${getRandomColor()}, ${getRandomColor()}, ${getRandomColor()})`
 
-    const polyline = L.polyline(coordinates, {
+    const polyline = L.polyline(latlngs, {
       color,
       weight: route.guideline ? 3 : 2,
       dashArray: route.guideline ? undefined : [10, 10],
@@ -44,19 +42,19 @@ onMounted(() => {
         fillOpacity: 0.1,
         radius: 7,
       })
-        .bindTooltip(`Точка #${waypointIndex + 1}<br>Курс: ${waypoint.azimuth}°<br>Время: ~ ${Math.round(waypoint.seconds / 60)} мин.<br>${waypoint.latLng}`)
+        .bindTooltip(`Точка #${waypointIndex + 1}<br>Курс: ${waypoint.azimuth}°<br>Время: ~ ${Math.round(waypoint.seconds / 60)} мин.`)
         .addTo(map)
     })
 
     if (routeIndex === 0) {
-      map.fitBounds(polyline.getBounds(), { maxZoom: 18 })
+      map.fitBounds(polyline.getBounds())
     }
   })
 
   spots.value!.forEach((spot) => {
     new L.Marker([spot.lat, spot.lng], {
       icon: new L.DivIcon({
-        className: 'emoji-marker',
+        className: 'marker--emoji',
         html: spot.emoji,
       }),
     })
@@ -93,11 +91,13 @@ useHead({
 <style lang="css">
 @import "tailwindcss";
 
+@import "leaflet/dist/leaflet.css";
+
 :root {
   --emoji-marker-size: 32px;
 }
 
-.emoji-marker {
+.marker--emoji {
   font-size: calc(var(--emoji-marker-size) * 0.5);
   line-height:    var(--emoji-marker-size);
   text-align: center;
