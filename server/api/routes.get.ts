@@ -67,9 +67,9 @@ export default defineEventHandler(async () => {
 
         const lngOffset = distance * Math.sin(radians) / (METERS_PER_DEGREE * Math.cos(originLat * (Math.PI / 180)))
 
-        originLat = Number.parseFloat((originLat + latOffset).toFixed(7))
+        originLat = originLat + latOffset
 
-        originLng = Number.parseFloat((originLng + lngOffset).toFixed(7))
+        originLng = originLng + lngOffset
 
         const waypointLatLng: LatLngTuple = [originLat, originLng]
 
