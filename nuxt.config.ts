@@ -12,6 +12,10 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
   ],
 
+  typescript: {
+    typeCheck: true,
+  },
+
   eslint: {
     config: {
       standalone: false,

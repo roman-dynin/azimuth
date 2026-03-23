@@ -8,14 +8,16 @@ datasource db {
 }
 
 model Route {
-  id    Int    @id @default(autoincrement())
-  title String
+  id               Int    @id @default(autoincrement())
+  title            String
+  parentWaypointId Int?
+  lat              Float?
+  lng              Float?
 }
 
 model Waypoint {
-  id       Int  @id @default(autoincrement())
-  parentId Int?
-  routeId  Int
-  azimuth  Int
-  seconds  Int
+  id      Int @id @default(autoincrement())
+  routeId Int
+  azimuth Int
+  seconds Int
 }

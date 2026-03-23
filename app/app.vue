@@ -1,41 +1,55 @@
 <script lang="ts" setup>
-import type { LatLngTuple } from 'leaflet'
+import type { EnrichedRoute } from '~~/types/api'
 
 import L from 'leaflet'
 
 import 'leaflet/dist/leaflet.css'
 
-const { data } = await useFetch('/api/waypoints')
+const { data } = await useFetch<EnrichedRoute[]>('/api/routes')
 
-const waypoints = computed(() => data.value || [])
+const routes = computed(() => data.value || [])
 
-const startPoint: LatLngTuple = [53.2409518, 34.4762879]
+const getRandomColor = () => Math.floor(Math.random() * 254)
 
 onMounted(() => {
-  const map = L.map('map', { attributionControl: false })
+  const map = L.map('map', {
+    attributionControl: false,
+  })
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
   }).addTo(map)
 
-  const coordinates = [startPoint, ...waypoints.value.map(waypoint => waypoint.lat_lng)]
+  routes.value.forEach((route, routeIndex) => {
+    const coordinates = [route.latLng, ...route.waypoints.map(waypoint => waypoint.latLng)]
 
-  const polyline = L.polyline(coordinates, {
-    color: 'green',
-    weight: 2,
-  }).addTo(map)
+    const color = `rgb(${getRandomColor()}, ${getRandomColor()}, ${getRandomColor()})`
 
-  waypoints.value.forEach((waypoint) => {
-    L.circleMarker(waypoint.lat_lng, {
-      color: 'red',
-      fillOpacity: 0.5,
-      radius: 2,
+    const polyline = L.polyline(coordinates, {
+      color,
+      weight: 2,
     })
-      .bindPopup(`Точка #${waypoint.id}<br>Курс: ${waypoint.azimuth}°`)
+      .bindTooltip(route.title)
       .addTo(map)
-  })
 
-  map.fitBounds(polyline.getBounds(), { padding: [50, 50] })
+    if (routeIndex === 0) {
+      map.fitBounds(polyline.getBounds(), { maxZoom: 18 })
+    }
+
+    route.waypoints.forEach((waypoint, waypointIndex) => {
+      L.circleMarker(waypoint.latLng, {
+        color,
+        fillOpacity: 0.5,
+        radius: 4,
+      })
+        .bindPopup(`Точка #${waypointIndex + 1}<br>Курс: ${waypoint.azimuth}°<br>Время: ~ ${Math.round(waypoint.seconds / 60)} мин.`)
+        .addTo(map)
+    })
+  })
+})
+
+useHead({
+  title: 'Керамзитка',
 })
 </script>
 
@@ -44,7 +58,11 @@ onMounted(() => {
 </template>
 
 <style>
-#map {
-  height: 640px;
+#map{
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
 }
 </style>
