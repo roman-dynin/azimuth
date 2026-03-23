@@ -12,7 +12,7 @@ const prisma = new PrismaClient({ adapter })
 async function main() {
   const route = await prisma.route.create({
     data: {
-      title: 'Тест',
+      title: 'Квадрат',
     },
   })
 
