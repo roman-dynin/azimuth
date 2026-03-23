@@ -12,11 +12,10 @@ const waypoints = computed(() => data.value || [])
 const startPoint: LatLngTuple = [53.2409518, 34.4762879]
 
 onMounted(() => {
-  const map = L.map('map')
+  const map = L.map('map', { attributionControl: false })
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
-    attribution: '© OpenStreetMap contributors',
   }).addTo(map)
 
   const coordinates = [startPoint, ...waypoints.value.map(waypoint => waypoint.lat_lng)]
