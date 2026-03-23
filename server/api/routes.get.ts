@@ -1,55 +1,46 @@
-// TODO: Кэширование?
-
-import type { LatLngTuple } from 'leaflet'
-
-import type { EnrichedRoute, EnrichedWaypoint } from '~~/types/api'
-
-const METERS_PER_DEGREE = 111320
-
-// Скорость дайвера в м/с (это тестовое значение и пока имеет мало общего с реальной скоростью)
-const DIVER_SPEED_MULTIPLIER = 0.25
-
 export default defineEventHandler(async () => {
-  const enrichedRoutes: EnrichedRoute[] = []
+  const routes: IAPIRoute[] = []
 
-  const processedRouteIds: number[] = []
+  const handledRouteIds = new Set<number>()
 
-  const processedWaypoints: Record<number, LatLngTuple> = {}
+  const waypointsLatLng: Record<number, [number, number]> = {}
 
-  const routes = await prisma.route.findMany({
+  const rawRoutes = await prisma.route.findMany({
     orderBy: {
       id: 'asc',
     },
   })
 
-  while (processedRouteIds.length < routes.length) {
-    for (const route of routes) {
-      if (processedRouteIds.findIndex(value => value === route.id) !== -1) {
+  while (handledRouteIds.size < rawRoutes.length) {
+    for (const route of rawRoutes) {
+      if (handledRouteIds.has(route.id)) {
         continue
       }
 
-      let originLat: number
+      let anchorLat: number
 
-      let originLng: number
+      let anchorLng: number
 
-      if (route.parentWaypointId) {
-        const origin = processedWaypoints[route.parentWaypointId]
+      if (route.anchorWaypointId) {
+        const waypointLatLng = waypointsLatLng[route.anchorWaypointId]
 
-        if (!origin) {
+        if (!waypointLatLng) {
           continue
         }
 
-        [originLat, originLng] = origin
+        [anchorLat, anchorLng] = waypointLatLng
       }
       else {
-        originLat = route.lat!
+        anchorLat = route.anchorLat!
 
-        originLng = route.lng!
+        anchorLng = route.anchorLng!
       }
 
-      const routeLatLng: LatLngTuple = [originLat, originLng] // Точка начала маршрута
+      const routeAnchorLat = anchorLat
 
-      const waypoints = await prisma.waypoint.findMany({
+      const routeAnchorLng = anchorLng
+
+      const rawWaypoints = await prisma.waypoint.findMany({
         where: {
           routeId: route.id,
         },
@@ -58,42 +49,74 @@ export default defineEventHandler(async () => {
         },
       })
 
-      const enrichedWaypoints: EnrichedWaypoint[] = waypoints.map((waypoint) => {
-        const distance = waypoint.seconds * DIVER_SPEED_MULTIPLIER
+      let prorogueRoute = false
 
-        const radians = waypoint.azimuth * (Math.PI / 180)
+      const waypoints: IAPIWaypoint[] = []
 
-        const latOffset = distance * Math.cos(radians) / METERS_PER_DEGREE
+      for (const waypoint of rawWaypoints) {
+        let latLng: [number, number] | undefined
 
-        const lngOffset = distance * Math.sin(radians) / (METERS_PER_DEGREE * Math.cos(originLat * (Math.PI / 180)))
+        if (waypoint.targetWaypointId) {
+          latLng = waypointsLatLng[waypoint.targetWaypointId]
 
-        originLat = originLat + latOffset
+          if (!latLng) {
+            prorogueRoute = true
 
-        originLng = originLng + lngOffset
+            break
+          }
 
-        const waypointLatLng: LatLngTuple = [originLat, originLng]
+          [anchorLat, anchorLng] = latLng
 
-        processedWaypoints[waypoint.id] = waypointLatLng
+          // TODO: Расчёт направления и времени
+        }
+        else {
+          const distance = waypoint.seconds! * DIVER_SPEED_MULTIPLIER
 
-        return {
+          const radians = waypoint.azimuth! * (Math.PI / 180)
+
+          const latOffset = distance * Math.cos(radians) / METERS_PER_DEGREE
+
+          const lngOffset = distance * Math.sin(radians) / (METERS_PER_DEGREE * Math.cos(anchorLat * (Math.PI / 180)))
+
+          anchorLat += latOffset
+
+          anchorLng += lngOffset
+
+          latLng = [anchorLat, anchorLng]
+
+          waypointsLatLng[waypoint.id] = latLng
+        }
+
+        waypoints.push({
           id: waypoint.id,
+          title: waypoint.title,
+          description: waypoint.description,
+          isNotable: waypoint.isNotable,
           azimuth: waypoint.azimuth,
           seconds: waypoint.seconds,
-          latLng: waypointLatLng,
-        }
-      })
+          lat: anchorLat,
+          lng: anchorLng,
+        })
+      }
 
-      enrichedRoutes.push({
+      if (prorogueRoute) {
+        continue
+      }
+
+      routes.push({
         id: route.id,
+        routeGroupId: route.routeGroupId,
         title: route.title,
-        guideline: route.guideline,
-        latLng: routeLatLng,
-        waypoints: enrichedWaypoints,
+        description: route.description,
+        isGuideline: route.isGuideline,
+        anchorLat: routeAnchorLat,
+        anchorLng: routeAnchorLng,
+        waypoints,
       })
 
-      processedRouteIds.push(route.id)
+      handledRouteIds.add(route.id)
     }
   }
 
-  return enrichedRoutes
+  return routes
 })

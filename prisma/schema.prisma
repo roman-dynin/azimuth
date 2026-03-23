@@ -7,26 +7,40 @@ datasource db {
   provider = "postgresql"
 }
 
+model RouteGroup {
+  id          Int     @id @default(autoincrement())
+  title       String?
+  description String?
+  color       String?
+}
+
 model Route {
   id               Int     @id @default(autoincrement())
-  title            String
-  guideline        Boolean @default(false)
-  parentWaypointId Int?
-  lat              Float?
-  lng              Float?
+  routeGroupId     Int?
+  title            String?
+  description      String?
+  isGuideline      Boolean @default(false)
+  anchorWaypointId Int?
+  anchorLat        Float?
+  anchorLng        Float?
 }
 
 model Waypoint {
-  id      Int @id @default(autoincrement())
-  routeId Int
-  azimuth Int
-  seconds Int
+  id               Int     @id @default(autoincrement())
+  routeId          Int
+  title            String?
+  description      String?
+  isNotable        Boolean @default(false)
+  targetWaypointId Int?
+  azimuth          Int?
+  seconds          Int?
 }
 
 model Spot {
-  id    Int    @id @default(autoincrement())
-  title String
-  emoji String
-  lat   Float
-  lng   Float
+  id          Int     @id @default(autoincrement())
+  title       String?
+  description String?
+  emoji       String
+  lat         Float
+  lng         Float
 }

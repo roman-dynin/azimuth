@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Route" ADD COLUMN     "startLat" DOUBLE PRECISION,
-ADD COLUMN     "startLng" DOUBLE PRECISION;
