@@ -1,18 +1,22 @@
 import type { FeatureGroup } from 'leaflet'
 
-import type { RouteGroup } from '~~/prisma/generated/client'
+import type { RouteGroup, Spot } from '~~/prisma/generated/client'
+
+export interface IAPIRouteGroup extends RouteGroup {}
 
 export interface RouteGroupWrapper {
-  value: RouteGroup
+  value: IAPIRouteGroup
   featureGroup: FeatureGroup
 }
 
 export interface IAPIRoute {
   id: number
   routeGroupId: number | null
+  guideline: boolean
   title: string | null
   description: string | null
-  isGuideline: boolean
+  color: string | null
+  weight: number | null
   anchorLat: number
   anchorLng: number
   waypoints: IAPIWaypoint[]
@@ -20,11 +24,14 @@ export interface IAPIRoute {
 
 export interface IAPIWaypoint {
   id: number
+  poi: boolean
   title: string | null
   description: string | null
-  isNotable: boolean
+  color: string | null
   azimuth: number | null
   seconds: number | null
   lat: number
   lng: number
 }
+
+export interface IAPISpot extends Spot {}

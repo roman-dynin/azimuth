@@ -1,15 +1,11 @@
 export default defineEventHandler(async () => {
   const routes: IAPIRoute[] = []
 
+  const rawRoutes = await prisma.route.findMany({ orderBy: { id: 'asc' } })
+
   const handledRouteIds = new Set<number>()
 
   const waypointsLatLng: Record<number, [number, number]> = {}
-
-  const rawRoutes = await prisma.route.findMany({
-    orderBy: {
-      id: 'asc',
-    },
-  })
 
   while (handledRouteIds.size < rawRoutes.length) {
     for (const route of rawRoutes) {
@@ -17,9 +13,9 @@ export default defineEventHandler(async () => {
         continue
       }
 
-      let anchorLat: number
+      let previousLat: number
 
-      let anchorLng: number
+      let previousLng: number
 
       if (route.anchorWaypointId) {
         const waypointLatLng = waypointsLatLng[route.anchorWaypointId]
@@ -28,17 +24,19 @@ export default defineEventHandler(async () => {
           continue
         }
 
-        [anchorLat, anchorLng] = waypointLatLng
+        [previousLat, previousLng] = waypointLatLng
       }
       else {
-        anchorLat = route.anchorLat!
+        previousLat = route.anchorLat!
 
-        anchorLng = route.anchorLng!
+        previousLng = route.anchorLng!
       }
 
-      const routeAnchorLat = anchorLat
+      const anchorLat = previousLat
 
-      const routeAnchorLng = anchorLng
+      const anchorLng = previousLng
+
+      const waypoints: IAPIWaypoint[] = []
 
       const rawWaypoints = await prisma.waypoint.findMany({
         where: {
@@ -49,9 +47,7 @@ export default defineEventHandler(async () => {
         },
       })
 
-      let prorogueRoute = false
-
-      const waypoints: IAPIWaypoint[] = []
+      let prorogue = false
 
       for (const waypoint of rawWaypoints) {
         let latLng: [number, number] | undefined
@@ -60,14 +56,14 @@ export default defineEventHandler(async () => {
           latLng = waypointsLatLng[waypoint.targetWaypointId]
 
           if (!latLng) {
-            prorogueRoute = true
+            prorogue = true
 
             break
           }
 
-          [anchorLat, anchorLng] = latLng
+          [previousLat, previousLng] = latLng
 
-          // TODO: Расчёт направления и времени
+          // TODO: Расчёт azimuth и seconds
         }
         else {
           const distance = waypoint.seconds! * DIVER_SPEED_MULTIPLIER
@@ -76,41 +72,44 @@ export default defineEventHandler(async () => {
 
           const latOffset = distance * Math.cos(radians) / METERS_PER_DEGREE
 
-          const lngOffset = distance * Math.sin(radians) / (METERS_PER_DEGREE * Math.cos(anchorLat * (Math.PI / 180)))
+          const lngOffset = distance * Math.sin(radians) / (METERS_PER_DEGREE * Math.cos(previousLat * (Math.PI / 180)))
 
-          anchorLat += latOffset
+          previousLat += latOffset
 
-          anchorLng += lngOffset
+          previousLng += lngOffset
 
-          latLng = [anchorLat, anchorLng]
+          latLng = [previousLat, previousLng]
 
           waypointsLatLng[waypoint.id] = latLng
         }
 
         waypoints.push({
           id: waypoint.id,
+          poi: waypoint.poi,
           title: waypoint.title,
           description: waypoint.description,
-          isNotable: waypoint.isNotable,
+          color: waypoint.color,
           azimuth: waypoint.azimuth,
           seconds: waypoint.seconds,
-          lat: anchorLat,
-          lng: anchorLng,
+          lat: previousLat,
+          lng: previousLng,
         })
       }
 
-      if (prorogueRoute) {
+      if (prorogue) {
         continue
       }
 
       routes.push({
         id: route.id,
         routeGroupId: route.routeGroupId,
+        guideline: route.guideline,
         title: route.title,
         description: route.description,
-        isGuideline: route.isGuideline,
-        anchorLat: routeAnchorLat,
-        anchorLng: routeAnchorLng,
+        color: route.color,
+        weight: route.weight,
+        anchorLat,
+        anchorLng,
         waypoints,
       })
 

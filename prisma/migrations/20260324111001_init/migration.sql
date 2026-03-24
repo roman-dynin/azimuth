@@ -4,6 +4,7 @@ CREATE TABLE "RouteGroup" (
     "title" TEXT,
     "description" TEXT,
     "color" TEXT,
+    "weight" INTEGER,
 
     CONSTRAINT "RouteGroup_pkey" PRIMARY KEY ("id")
 );
@@ -12,9 +13,11 @@ CREATE TABLE "RouteGroup" (
 CREATE TABLE "Route" (
     "id" SERIAL NOT NULL,
     "routeGroupId" INTEGER,
+    "guideline" BOOLEAN NOT NULL DEFAULT false,
     "title" TEXT,
     "description" TEXT,
-    "isGuideline" BOOLEAN NOT NULL DEFAULT false,
+    "color" TEXT,
+    "weight" INTEGER,
     "anchorWaypointId" INTEGER,
     "anchorLat" DOUBLE PRECISION,
     "anchorLng" DOUBLE PRECISION,
@@ -26,9 +29,10 @@ CREATE TABLE "Route" (
 CREATE TABLE "Waypoint" (
     "id" SERIAL NOT NULL,
     "routeId" INTEGER NOT NULL,
+    "poi" BOOLEAN NOT NULL DEFAULT false,
     "title" TEXT,
     "description" TEXT,
-    "isNotable" BOOLEAN NOT NULL DEFAULT false,
+    "color" TEXT,
     "targetWaypointId" INTEGER,
     "azimuth" INTEGER,
     "seconds" INTEGER,

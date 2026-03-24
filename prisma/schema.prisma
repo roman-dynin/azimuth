@@ -12,16 +12,17 @@ model RouteGroup {
   title       String?
   description String?
   color       String?
+  weight      Int?
 }
 
 model Route {
   id               Int     @id @default(autoincrement())
   routeGroupId     Int?
+  guideline        Boolean @default(false)
   title            String?
   description      String?
   color            String?
   weight           Int?
-  guideline        Boolean @default(false)
   anchorWaypointId Int?
   anchorLat        Float?
   anchorLng        Float?
@@ -30,6 +31,7 @@ model Route {
 model Waypoint {
   id               Int     @id @default(autoincrement())
   routeId          Int
+  poi              Boolean @default(false)
   title            String?
   description      String?
   color            String?

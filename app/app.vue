@@ -3,50 +3,13 @@ import type { LatLng, LatLngTuple } from 'leaflet'
 
 import L from 'leaflet'
 
-function getWaypointHelp(waypoint: IAPIWaypoint): string {
-  const parts: string[] = []
+const { data: routeGroups } = await useFetch<IAPIRouteGroup[]>('/api/routeGroups')
 
-  parts.push(`Точка #${waypoint.id}`)
-
-  if (waypoint.azimuth) {
-    parts.push(`Азимут: ${waypoint.azimuth}&deg;`)
-  }
-
-  if (waypoint.seconds) {
-    parts.push(`Время движения от пред. точки: &asymp; ${Math.round(waypoint.seconds / 60)} мин.`)
-  }
-
-  return parts.join('<br>')
-}
-
-const { data: routeGroups } = await useFetch('/api/routeGroups')
-
-const routeGroupWrappers: Record<number, RouteGroupWrapper> = {}
-
-routeGroups.value?.forEach((routeGroup) => {
-  const featureGroup = new L.FeatureGroup()
-
-  featureGroup.on('mouseover', (event) => {
-    event.target.setStyle({ color: UI_ROUTE_HIGHLIGHT_COLOR })
-  })
-
-  featureGroup.on('mouseout', (event) => {
-    event.target.setStyle({ color: routeGroup.color || getRandomColor() })
-  })
-
-  if (routeGroup.title) {
-    featureGroup.bindTooltip(routeGroup.title)
-  }
-
-  routeGroupWrappers[routeGroup.id] = {
-    value: routeGroup,
-    featureGroup,
-  }
-})
+const routeGroupWrappers = getRouteGroupWrappers(routeGroups.value!)
 
 const { data: routes } = await useFetch<IAPIRoute[]>('/api/routes')
 
-const { data: spots } = await useFetch('/api/spots')
+const { data: spots } = await useFetch<IAPISpot[]>('/api/spots')
 
 const clickLatLng = ref<LatLng | null>(null)
 
@@ -56,26 +19,28 @@ onMounted(() => {
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
 
   routes.value?.forEach((route, routeIndex) => {
+    const routeGroupWrapper = route.routeGroupId ? routeGroupWrappers[route.routeGroupId] : undefined
+
     const coordinates = [[route.anchorLat, route.anchorLng], ...route.waypoints.map(waypoint => [waypoint.lat, waypoint.lng])] as LatLngTuple[]
 
-    let color = getRandomColor()
+    const color = getRouteColor(routeGroupWrapper?.value, route)
 
-    if (route.routeGroupId) {
-      color = routeGroupWrappers[route.routeGroupId]?.value.color || color
-    }
+    const weight = getRouteWeight(routeGroupWrapper?.value, route)
 
     const polyline = L.polyline(coordinates, {
       color,
-      weight: route.isGuideline ? UI_ROUTE_WEIGHT + 1 : UI_ROUTE_WEIGHT,
-      dashArray: route.isGuideline ? undefined : [10, 10],
+      weight,
+      dashArray: route.guideline ? undefined : [10, 10],
     })
 
-    if (route.title) {
+    const help = getRouteTooltip(route)
+
+    if (help) {
       if (route.routeGroupId) {
-        polyline.bindPopup(route.title)
+        polyline.bindPopup(help)
       }
       else {
-        polyline.bindTooltip(route.title)
+        polyline.bindTooltip(help)
       }
     }
 
@@ -87,14 +52,9 @@ onMounted(() => {
     }
 
     route.waypoints.forEach((waypoint) => {
-      const marker = L.circleMarker([waypoint.lat, waypoint.lng], {
-        color,
-        weight: 1,
-        fillOpacity: 0.1,
-        radius: 7,
-      })
+      const marker = L.circleMarker([waypoint.lat, waypoint.lng], { ...getWaypointMarkerOptions(color, waypoint) })
 
-      const help = getWaypointHelp(waypoint)
+      const help = getWaypointTooltip(waypoint)
 
       if (help) {
         marker.bindTooltip(help)
@@ -108,9 +68,7 @@ onMounted(() => {
     }
   })
 
-  Object.values(routeGroupWrappers).forEach((routeGroupWrapper) => {
-    routeGroupWrapper.featureGroup.addTo(map)
-  })
+  Object.values(routeGroupWrappers).forEach(routeGroupWrapper => routeGroupWrapper.featureGroup.addTo(map))
 
   spots.value?.forEach((spot) => {
     const marker = new L.Marker([spot.lat, spot.lng], {
@@ -120,8 +78,10 @@ onMounted(() => {
       }),
     })
 
-    if (spot.title) {
-      marker.bindTooltip(spot.title)
+    const help = getSpotTooltip(spot)
+
+    if (help) {
+      marker.bindTooltip(help)
     }
 
     marker.addTo(map)

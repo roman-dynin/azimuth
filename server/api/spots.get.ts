@@ -1,7 +1,1 @@
-export default defineEventHandler(async () => {
-  return prisma.spot.findMany({
-    orderBy: {
-      id: 'asc',
-    },
-  })
-})
+export default defineEventHandler(async () => prisma.spot.findMany({ orderBy: { id: 'asc' } }))

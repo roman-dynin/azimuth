@@ -1,7 +1,1 @@
-export default defineEventHandler(async () => {
-  return prisma.routeGroup.findMany({
-    orderBy: {
-      id: 'asc',
-    },
-  })
-})
+export default defineEventHandler(async () => prisma.routeGroup.findMany({ orderBy: { id: 'asc' } }))
