@@ -19,7 +19,9 @@ model Route {
   routeGroupId     Int?
   title            String?
   description      String?
-  isGuideline      Boolean @default(false)
+  color            String?
+  weight           Int?
+  guideline        Boolean @default(false)
   anchorWaypointId Int?
   anchorLat        Float?
   anchorLng        Float?
@@ -30,7 +32,7 @@ model Waypoint {
   routeId          Int
   title            String?
   description      String?
-  isNotable        Boolean @default(false)
+  color            String?
   targetWaypointId Int?
   azimuth          Int?
   seconds          Int?
