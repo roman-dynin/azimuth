@@ -55,7 +55,21 @@ watch(status, (value) => {
 onMounted(() => {
   map.value = L.map('map', { attributionControl: false })
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map.value)
+  const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+  }).addTo(map.value)
+
+  const googleSatelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
+    maxZoom: 19,
+    subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+  })
+
+  L.control.layers({
+    // eslint-disable-next-line style/quote-props
+    'Карта': osmLayer,
+    // eslint-disable-next-line style/quote-props
+    'Спутник': googleSatelliteLayer,
+  }).addTo(map.value!)
 
   map.value!.on('click', (event) => {
     mapClickLatLng.value = map.value!.mouseEventToLatLng(event.originalEvent)
@@ -73,11 +87,11 @@ useHead({
       <div id="map" class="h-full" />
     </div>
     <div class="flex justify-between px-2 py-2 bg-black text-gray-500 text-xs">
-      <div>
+      <div class="hidden lg:block">
         {{ mapClickLatLng }}
       </div>
       <div>
-        Сделано с любовью!; 🐙 <a href="https://github.com/roman-dynin/azimuth" target="_blank">@roman-dynin</a>
+        <span class="hidden lg:block">Сделано с любовью!</span> 🐙 <a href="https://github.com/roman-dynin/azimuth" target="_blank">@roman-dynin</a>
       </div>
     </div>
   </div>

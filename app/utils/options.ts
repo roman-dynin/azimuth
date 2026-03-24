@@ -7,7 +7,7 @@ export function getWaypointCircleMarkerOptions(
   return {
     color: waypoint.color || routeColor,
     weight: 1,
-    radius: waypoint.poi ? 8 : 6,
+    radius: waypoint.poi ? 10 : 8,
     fillOpacity: waypoint.poi ? 0.5 : 0.25,
   }
 }

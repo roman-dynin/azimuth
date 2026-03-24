@@ -11,8 +11,8 @@ export function getRouteWeight(
   }
 
   if (route.guideline) {
-    return 4
+    return 6
   }
 
-  return 2
+  return 3
 }
