@@ -1,28 +1,22 @@
 <script lang="ts" setup>
-import type { IAPIRoute, RouteGroupWrapper } from '#shared/types/api'
-
 import type { LatLng, LatLngTuple } from 'leaflet'
 
 import L from 'leaflet'
 
-const getRandomColorValue = () => Math.floor(Math.random() * 254)
+function getWaypointHelp(waypoint: IAPIWaypoint): string {
+  const parts: string[] = []
 
-const getRandomColor = () => `rgba(${getRandomColorValue()}, ${getRandomColorValue()}, ${getRandomColorValue()}, 0.75)`
-
-function getWaypointTooltipContent(waypoint: IAPIWaypoint): string {
-  const data: string[] = []
-
-  data.push(`Точка #${waypoint.id}`)
+  parts.push(`Точка #${waypoint.id}`)
 
   if (waypoint.azimuth) {
-    data.push(`Курс: ${waypoint.azimuth}°`)
+    parts.push(`Азимут: ${waypoint.azimuth}&deg;`)
   }
 
   if (waypoint.seconds) {
-    data.push(`Время от пред. точки: ~ ${Math.round((waypoint.seconds || 0) / 60)} мин.`)
+    parts.push(`Время движения от пред. точки: &asymp; ${Math.round(waypoint.seconds / 60)} мин.`)
   }
 
-  return data.join('<br>')
+  return parts.join('<br>')
 }
 
 const { data: routeGroups } = await useFetch('/api/routeGroups')
@@ -33,15 +27,11 @@ routeGroups.value?.forEach((routeGroup) => {
   const featureGroup = new L.FeatureGroup()
 
   featureGroup.on('mouseover', (event) => {
-    event.target.setStyle({
-      color: 'rgba(0, 255, 0, 0.75)',
-    })
+    event.target.setStyle({ color: UI_ROUTE_HIGHLIGHT_COLOR })
   })
 
   featureGroup.on('mouseout', (event) => {
-    event.target.setStyle({
-      color: routeGroup.color || getRandomColor(),
-    })
+    event.target.setStyle({ color: routeGroup.color || getRandomColor() })
   })
 
   if (routeGroup.title) {
@@ -61,13 +51,9 @@ const { data: spots } = await useFetch('/api/spots')
 const clickLatLng = ref<LatLng | null>(null)
 
 onMounted(() => {
-  const map = L.map('map', {
-    attributionControl: false,
-  })
+  const map = L.map('map', { attributionControl: false })
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-  }).addTo(map)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
 
   routes.value?.forEach((route, routeIndex) => {
     const coordinates = [[route.anchorLat, route.anchorLng], ...route.waypoints.map(waypoint => [waypoint.lat, waypoint.lng])] as LatLngTuple[]
@@ -80,7 +66,7 @@ onMounted(() => {
 
     const polyline = L.polyline(coordinates, {
       color,
-      weight: route.isGuideline ? UI_ROUTE_POLYLINE_WIGHT + 1 : UI_ROUTE_POLYLINE_WIGHT,
+      weight: route.isGuideline ? UI_ROUTE_WEIGHT + 1 : UI_ROUTE_WEIGHT,
       dashArray: route.isGuideline ? undefined : [10, 10],
     })
 
@@ -108,10 +94,10 @@ onMounted(() => {
         radius: 7,
       })
 
-      const tooltipContent = getWaypointTooltipContent(waypoint)
+      const help = getWaypointHelp(waypoint)
 
-      if (tooltipContent) {
-        marker.bindTooltip(tooltipContent)
+      if (help) {
+        marker.bindTooltip(help)
       }
 
       marker.addTo(map)
