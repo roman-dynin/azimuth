@@ -4,7 +4,7 @@ import type { RouteGroup, Spot } from '~~/prisma/generated/client'
 
 export interface IAPIRouteGroup extends RouteGroup {}
 
-export interface RouteGroupWrapper {
+export interface RouteGroupProxy {
   value: IAPIRouteGroup
   featureGroup: FeatureGroup
 }

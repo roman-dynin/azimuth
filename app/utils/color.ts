@@ -1,8 +1,15 @@
-export const getRandomColorValue = () => Math.floor(Math.random() * 254)
+export function getRandomColorValue(): number {
+  return Math.floor(Math.random() * 254)
+}
 
-export const getRandomRGB = () => `rgba(${getRandomColorValue()}, ${getRandomColorValue()}, ${getRandomColorValue()}, 0.75)`
+export function getRandomRGBA(): string {
+  return `rgba(${getRandomColorValue()}, ${getRandomColorValue()}, ${getRandomColorValue()}, 0.75)`
+}
 
-export function getRouteColor(routeGroup: IAPIRouteGroup | undefined, route: IAPIRoute): string {
+export function getRouteColor(
+  routeGroup: IAPIRouteGroup | undefined,
+  route: IAPIRoute,
+): string {
   if (routeGroup?.color) {
     return routeGroup.color
   }
@@ -11,5 +18,5 @@ export function getRouteColor(routeGroup: IAPIRouteGroup | undefined, route: IAP
     return route.color
   }
 
-  return getRandomRGB()
+  return getRandomRGBA()
 }

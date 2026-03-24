@@ -1,4 +1,7 @@
-export function getRouteWeight(routeGroup: IAPIRouteGroup | undefined, route: IAPIRoute): number {
+export function getRouteWeight(
+  routeGroup: IAPIRouteGroup | undefined,
+  route: IAPIRoute,
+): number {
   if (routeGroup?.weight) {
     return routeGroup.weight
   }
@@ -8,7 +11,7 @@ export function getRouteWeight(routeGroup: IAPIRouteGroup | undefined, route: IA
   }
 
   if (route.guideline) {
-    return 3
+    return 4
   }
 
   return 2

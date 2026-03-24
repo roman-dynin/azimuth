@@ -1,99 +1,69 @@
 <script lang="ts" setup>
-import type { LatLng, LatLngTuple } from 'leaflet'
+import type { LatLng, Map as LeafletMap } from 'leaflet'
 
 import L from 'leaflet'
 
-const { data: routeGroups } = await useFetch<IAPIRouteGroup[]>('/api/routeGroups')
+const { data, status } = useAsyncData(
+  'data',
+  async () => {
+    const [
+      routeGroups,
+      routes,
+      spots,
+    ] = await Promise.all([
+      $fetch<IAPIRouteGroup[]>('/api/routeGroups'),
+      $fetch<IAPIRoute[]>('/api/routes'),
+      $fetch<IAPISpot[]>('/api/spots'),
+    ])
 
-const routeGroupWrappers = getRouteGroupWrappers(routeGroups.value!)
+    return {
+      routeGroups,
+      routes,
+      spots,
+    }
+  },
+)
 
-const { data: routes } = await useFetch<IAPIRoute[]>('/api/routes')
+const routeGroupProxies = shallowRef<Record<number, RouteGroupProxy>>()
 
-const { data: spots } = await useFetch<IAPISpot[]>('/api/spots')
+const map = shallowRef<LeafletMap>()
 
-const clickLatLng = ref<LatLng | null>(null)
+const mapClickLatLng = shallowRef<LatLng>()
+
+watch(status, (value) => {
+  if (value !== 'success') {
+    return
+  }
+
+  if (!data.value) {
+    return
+  }
+
+  if (!map.value) {
+    return
+  }
+
+  routeGroupProxies.value = getRouteGroupProxies(data.value.routeGroups)
+
+  renderRoutes(map.value, routeGroupProxies.value, data.value.routes)
+
+  renderRouteGroups(map.value, routeGroupProxies.value)
+
+  renderSpots(map.value, data.value.spots)
+})
 
 onMounted(() => {
-  const map = L.map('map', { attributionControl: false })
+  map.value = L.map('map', { attributionControl: false })
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map)
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map.value)
 
-  routes.value?.forEach((route, routeIndex) => {
-    const routeGroupWrapper = route.routeGroupId ? routeGroupWrappers[route.routeGroupId] : undefined
-
-    const coordinates = [[route.anchorLat, route.anchorLng], ...route.waypoints.map(waypoint => [waypoint.lat, waypoint.lng])] as LatLngTuple[]
-
-    const color = getRouteColor(routeGroupWrapper?.value, route)
-
-    const weight = getRouteWeight(routeGroupWrapper?.value, route)
-
-    const polyline = L.polyline(coordinates, {
-      color,
-      weight,
-      dashArray: route.guideline ? undefined : [10, 10],
-    })
-
-    const help = getRouteTooltip(route)
-
-    if (help) {
-      if (route.routeGroupId) {
-        polyline.bindPopup(help)
-      }
-      else {
-        polyline.bindTooltip(help)
-      }
-    }
-
-    if (route.routeGroupId) {
-      routeGroupWrappers[route.routeGroupId]?.featureGroup.addLayer(polyline)
-    }
-    else {
-      polyline.addTo(map)
-    }
-
-    route.waypoints.forEach((waypoint) => {
-      const marker = L.circleMarker([waypoint.lat, waypoint.lng], { ...getWaypointMarkerOptions(color, waypoint) })
-
-      const help = getWaypointTooltip(waypoint)
-
-      if (help) {
-        marker.bindTooltip(help)
-      }
-
-      marker.addTo(map)
-    })
-
-    if (routeIndex === 0) {
-      map.fitBounds(polyline.getBounds())
-    }
-  })
-
-  Object.values(routeGroupWrappers).forEach(routeGroupWrapper => routeGroupWrapper.featureGroup.addTo(map))
-
-  spots.value?.forEach((spot) => {
-    const marker = new L.Marker([spot.lat, spot.lng], {
-      icon: new L.DivIcon({
-        className: 'marker--emoji',
-        html: spot.emoji,
-      }),
-    })
-
-    const help = getSpotTooltip(spot)
-
-    if (help) {
-      marker.bindTooltip(help)
-    }
-
-    marker.addTo(map)
-  })
-
-  map.on('click', (event) => {
-    clickLatLng.value = map.mouseEventToLatLng(event.originalEvent)
+  map.value!.on('click', (event) => {
+    mapClickLatLng.value = map.value!.mouseEventToLatLng(event.originalEvent)
   })
 })
 
 useHead({
-  title: 'Керамзитка',
+  title: 'Azimuth',
 })
 </script>
 
@@ -104,7 +74,7 @@ useHead({
     </div>
     <div class="flex justify-between px-2 py-2 bg-black text-gray-500 text-xs">
       <div>
-        {{ clickLatLng }}
+        {{ mapClickLatLng }}
       </div>
       <div>
         Сделано с любовью!; 🐙 <a href="https://github.com/roman-dynin/azimuth" target="_blank">@roman-dynin</a>
