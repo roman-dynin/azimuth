@@ -82,7 +82,7 @@ useHead({
 </script>
 
 <template>
-  <div class="flex flex-col h-screen">
+  <div class="flex flex-col h-dvh">
     <div class="grow">
       <div id="map" class="h-full" />
     </div>
