@@ -23,11 +23,6 @@ logs
 .env
 .env.*
 !.env.example
-env/*.env
-!env/*.env.example
-
-# Local Docker data
-.docker
 
 # Prisma
 prisma/generated
