@@ -11,7 +11,7 @@ services:
     restart: unless-stopped
 
   azimuth:
-    build: .
+    image: ghcr.io/roman-dynin/azimuth:latest
     env_file:
       - .env
     ports:
