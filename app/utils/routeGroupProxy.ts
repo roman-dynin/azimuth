@@ -17,7 +17,7 @@ export function getRouteGroupProxies(routeGroups: IAPIRouteGroup[]): Record<numb
     const tooltip = getRouteGroupTooltip(routeGroup)
 
     if (tooltip) {
-      featureGroup.bindTooltip(tooltip)
+      featureGroup.bindTooltip(tooltip, { permanent: true })
     }
 
     routeGroupProxies[routeGroup.id] = {

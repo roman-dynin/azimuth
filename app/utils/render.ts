@@ -34,7 +34,7 @@ export function renderRoutes(
         polyline.bindPopup(tooltip)
       }
       else {
-        polyline.bindTooltip(tooltip)
+        polyline.bindTooltip(tooltip, { permanent: true })
       }
     }
 

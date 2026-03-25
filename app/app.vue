@@ -91,7 +91,7 @@ useHead({
         {{ mapClickLatLng }}
       </div>
       <div>
-        <span class="hidden lg:block">Сделано с любовью!</span> 🐙 <a href="https://github.com/roman-dynin/azimuth" target="_blank">@roman-dynin</a>
+        <span class="hidden lg:inline">Сделано с любовью!</span> 🐙 <a href="https://github.com/roman-dynin/azimuth" target="_blank">@roman-dynin</a>
       </div>
     </div>
   </div>
