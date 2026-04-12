@@ -38,6 +38,7 @@ model Waypoint {
   targetWaypointId Int?
   azimuth          Int?
   seconds          Int?
+  distance         Float?
 }
 
 model Spot {

@@ -30,6 +30,7 @@ export interface IAPIWaypoint {
   color: string | null
   azimuth: number | null
   seconds: number | null
+  distance: number | null
   lat: number
   lng: number
 }

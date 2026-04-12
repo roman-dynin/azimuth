@@ -52,6 +52,8 @@ export default defineEventHandler(async () => {
       for (const waypoint of rawWaypoints) {
         let latLng: [number, number] | undefined
 
+        let seconds: number | null = waypoint.seconds
+
         if (waypoint.targetWaypointId) {
           latLng = waypointsLatLng[waypoint.targetWaypointId]
 
@@ -66,7 +68,11 @@ export default defineEventHandler(async () => {
           // TODO: Расчёт azimuth и seconds
         }
         else {
-          const distance = waypoint.seconds! * DIVER_SPEED_MULTIPLIER
+          const distance = waypoint.distance ?? waypoint.seconds! * DIVER_SPEED_MULTIPLIER
+
+          seconds = waypoint.distance !== null
+            ? waypoint.distance / DIVER_SPEED_MULTIPLIER
+            : waypoint.seconds
 
           const radians = waypoint.azimuth! * (Math.PI / 180)
 
@@ -90,7 +96,8 @@ export default defineEventHandler(async () => {
           description: waypoint.description,
           color: waypoint.color,
           azimuth: waypoint.azimuth,
-          seconds: waypoint.seconds,
+          seconds,
+          distance: waypoint.distance,
           lat: previousLat,
           lng: previousLng,
         })
