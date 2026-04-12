@@ -51,6 +51,8 @@ export function getWaypointTooltip(waypoint: IAPIWaypoint): string {
     if (minutes > 0) {
       parts.push(`Время движения от пред. точки: &asymp; ${minutes} мин.`)
     }
+
+    parts.push(`Расстояние от пред. точки: &asymp; ${Math.round(waypoint.distance!)} м.`)
   }
 
   return parts.join('<br>')
