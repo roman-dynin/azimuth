@@ -42,9 +42,10 @@ export default defineEventHandler(async () => {
         where: {
           routeId: route.id,
         },
-        orderBy: {
-          id: 'asc',
-        },
+        orderBy: [
+          { order: { sort: 'asc', nulls: 'last' } },
+          { id: 'asc' },
+        ],
       })
 
       let prorogue = false
