@@ -44,9 +44,9 @@ function render() {
 
   routeGroupProxies.value = getRouteGroupProxies(data.value.routeGroups)
 
-  renderRouteGroups(contentLayer.value, routeGroupProxies.value)
-
   renderRoutes(map.value, contentLayer.value, routeGroupProxies.value, data.value.routes, initialRender)
+
+  renderRouteGroups(contentLayer.value, routeGroupProxies.value)
 
   renderSpots(contentLayer.value, data.value.spots)
 

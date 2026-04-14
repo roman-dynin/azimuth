@@ -102,13 +102,7 @@ export function useSidebar() {
       if (fresh) state.value = { ...s, route: fresh }
     }
 
-    if (s.view === 'waypoints') {
-      const fresh = routes.find((route) => route.id === s.route.id)
-
-      if (fresh) state.value = { ...s, route: fresh }
-    }
-
-    if (s.view === 'waypoint') {
+    if (s.view === 'waypoints' || s.view === 'waypoint') {
       const fresh = routes.find((route) => route.id === s.route.id)
 
       if (fresh) state.value = { ...s, route: fresh }
