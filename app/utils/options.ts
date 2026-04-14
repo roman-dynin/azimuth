@@ -1,9 +1,6 @@
 import type { CircleMarkerOptions } from 'leaflet'
 
-export function getWaypointCircleMarkerOptions(
-  routeColor: string,
-  waypoint: IAPIWaypoint,
-): CircleMarkerOptions {
+export function getWaypointCircleMarkerOptions(routeColor: string, waypoint: IAPIWaypoint): CircleMarkerOptions {
   return {
     color: waypoint.color || routeColor,
     weight: 1,

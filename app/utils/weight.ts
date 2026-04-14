@@ -1,7 +1,4 @@
-export function getRouteWeight(
-  routeGroup: IAPIRouteGroup | undefined,
-  route: IAPIRoute,
-): number {
+export function getRouteWeight(routeGroup: IAPIRouteGroup | undefined, route: IAPIRoute): number {
   if (routeGroup?.weight) {
     return routeGroup.weight
   }

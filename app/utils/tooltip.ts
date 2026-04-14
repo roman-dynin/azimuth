@@ -29,7 +29,7 @@ export function getRouteTooltip(route: IAPIRoute): string {
 export function getWaypointTooltip(waypoint: IAPIWaypoint): string {
   const parts: string[] = []
 
-  parts.push(`Точка #${waypoint.id}`)
+  parts.push(`<span style="color: #d1d5db; font-size: 9px">ID: ${waypoint.id}</span>`)
 
   if (waypoint.title) {
     parts.push(waypoint.title)
