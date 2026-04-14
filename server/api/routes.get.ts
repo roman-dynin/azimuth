@@ -24,9 +24,8 @@ export default defineEventHandler(async () => {
           continue
         }
 
-        [previousLat, previousLng] = waypointLatLng
-      }
-      else {
+        ;[previousLat, previousLng] = waypointLatLng
+      } else {
         previousLat = route.anchorLat!
 
         previousLng = route.anchorLng!
@@ -42,10 +41,7 @@ export default defineEventHandler(async () => {
         where: {
           routeId: route.id,
         },
-        orderBy: [
-          { order: { sort: 'asc', nulls: 'last' } },
-          { id: 'asc' },
-        ],
+        orderBy: [{ order: { sort: 'asc', nulls: 'last' } }, { id: 'asc' }],
       })
 
       let prorogue = false
@@ -66,22 +62,20 @@ export default defineEventHandler(async () => {
             break
           }
 
-          [previousLat, previousLng] = latLng
+          ;[previousLat, previousLng] = latLng
 
           // TODO: Расчёт azimuth и seconds
-        }
-        else {
+        } else {
           distance = distance ?? seconds! * DIVER_SPEED_MULTIPLIER
 
-          seconds = distance !== null
-            ? distance / DIVER_SPEED_MULTIPLIER
-            : seconds
+          seconds = distance !== null ? distance / DIVER_SPEED_MULTIPLIER : seconds
 
           const radians = waypoint.azimuth! * (Math.PI / 180)
 
-          const latOffset = distance * Math.cos(radians) / METERS_PER_DEGREE
+          const latOffset = (distance * Math.cos(radians)) / METERS_PER_DEGREE
 
-          const lngOffset = distance * Math.sin(radians) / (METERS_PER_DEGREE * Math.cos(previousLat * (Math.PI / 180)))
+          const lngOffset =
+            (distance * Math.sin(radians)) / (METERS_PER_DEGREE * Math.cos(previousLat * (Math.PI / 180)))
 
           previousLat += latOffset
 
@@ -98,9 +92,11 @@ export default defineEventHandler(async () => {
           title: waypoint.title,
           description: waypoint.description,
           color: waypoint.color,
+          targetWaypointId: waypoint.targetWaypointId,
           azimuth: waypoint.azimuth,
           seconds,
           distance,
+          order: waypoint.order,
           lat: previousLat,
           lng: previousLng,
         })
@@ -114,6 +110,7 @@ export default defineEventHandler(async () => {
         id: route.id,
         routeGroupId: route.routeGroupId,
         guideline: route.guideline,
+        anchorWaypointId: route.anchorWaypointId,
         title: route.title,
         description: route.description,
         color: route.color,
