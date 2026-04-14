@@ -48,7 +48,7 @@ export function renderRoutes(
     renderRouteWaypoints(contentLayer, color, route.waypoints)
 
     if (routeIndex === 0 && fitBounds) {
-      map.fitBounds(polyline.getBounds())
+      map.fitBounds(polyline.getBounds(), { maxZoom: 19 })
     }
   })
 }
