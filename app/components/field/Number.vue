@@ -32,7 +32,10 @@ function onBlur() {
 
 <template>
   <div :class="{ 'space-y-1': label }">
-    <div v-if="label" class="text-xs tracking-wide text-gray-400 uppercase">
+    <div
+      v-if="label"
+      class="text-xs tracking-wide text-gray-400 uppercase"
+    >
       {{ label }}
     </div>
     <input
