@@ -39,13 +39,13 @@ export function getWaypointTooltip(waypoint: IAPIWaypoint): string {
     parts.push(waypoint.description)
   }
 
-  if (waypoint.azimuth) {
+  if (waypoint.azimuth !== null) {
     const reverseAzimuth = (waypoint.azimuth + 180) % 360
 
     parts.push(`Азимут: &#8599; ${waypoint.azimuth}&deg; &#8601; ${reverseAzimuth}&deg;`)
   }
 
-  if (waypoint.seconds) {
+  if (waypoint.seconds !== null) {
     const minutes = Math.round(waypoint.seconds / 60)
 
     if (minutes > 0) {
