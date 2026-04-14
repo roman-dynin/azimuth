@@ -120,7 +120,7 @@ export function useSidebar() {
   }
 
   return {
-    show,
+    show: readonly(show),
     view,
     editingRouteGroup,
     editingRoute,
