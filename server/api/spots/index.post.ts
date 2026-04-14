@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
     emoji: string
     lat: number
     lng: number
+    depth?: number | null
   }>(event)
 
   return prisma.spot.create({ data: body })

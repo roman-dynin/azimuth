@@ -55,6 +55,10 @@ export function getWaypointTooltip(waypoint: IAPIWaypoint): string {
     parts.push(`Расстояние от пред. точки: &asymp; ${Math.round(waypoint.distance!)} м.`)
   }
 
+  if (waypoint.depth !== null) {
+    parts.push(`Глубина: ${waypoint.depth} м.`)
+  }
+
   return parts.join('<br>')
 }
 
@@ -67,6 +71,10 @@ export function getSpotTooltip(spot: IAPISpot): string {
 
   if (spot.description) {
     parts.push(spot.description)
+  }
+
+  if (spot.depth !== null) {
+    parts.push(`Глубина: ${spot.depth} м.`)
   }
 
   return parts.join('<br>')

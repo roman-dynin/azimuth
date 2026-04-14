@@ -19,6 +19,7 @@ const form = reactive({
   emoji: props.spot?.emoji ?? '',
   lat: props.spot?.lat ?? null,
   lng: props.spot?.lng ?? null,
+  depth: props.spot?.depth ?? null,
 })
 
 function setLatLng(lat: number, lng: number): void {
@@ -84,6 +85,13 @@ const { saving, removing, error, save, remove } = useEntityForm(
       @update:lat="form.lat = $event"
       @update:lng="form.lng = $event"
       @toggle-picking="toggle"
+    />
+
+    <FieldNumber
+      v-model="form.depth"
+      label="Глубина (м.)"
+      :min="0"
+      :step="1"
     />
   </div>
 

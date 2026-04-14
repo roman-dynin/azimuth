@@ -8,6 +8,7 @@ export default defineEventHandler(async (event) => {
     azimuth?: number | null
     distance?: number | null
     seconds?: number | null
+    depth?: number | null
     order?: number | null
   }>(event)
 

@@ -21,6 +21,7 @@ const form = reactive({
   azimuth: null as number | null,
   distance: null as number | null,
   seconds: null as number | null,
+  depth: null as number | null,
   order: null as number | null,
 })
 
@@ -100,6 +101,13 @@ const { saving, removing, error, save, remove } = useEntityForm(
           :min="0"
         />
       </template>
+
+      <FieldNumber
+        v-model="form.depth"
+        label="Глубина (м.)"
+        :min="0"
+        :step="1"
+      />
 
       <FieldNumber
         v-model="form.order"

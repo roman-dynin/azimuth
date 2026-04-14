@@ -96,6 +96,7 @@ export default defineEventHandler(async () => {
           azimuth: waypoint.azimuth,
           seconds,
           distance,
+          depth: waypoint.depth,
           order: waypoint.order,
           lat: previousLat,
           lng: previousLng,
