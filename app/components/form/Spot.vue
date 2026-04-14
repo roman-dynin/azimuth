@@ -1,9 +1,9 @@
 <script lang="ts" setup>
-import type { LatLng, LatLngTuple } from 'leaflet'
+import type { LatLngLiteral, LatLngTuple } from 'leaflet'
 
 const props = defineProps<{
   spot: IAPISpot | null
-  mapClickLatLng?: LatLng
+  mapClickLatLng?: LatLngLiteral
 }>()
 
 const emit = defineEmits<{

@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import type { LatLng, LatLngTuple } from 'leaflet'
+import type { LatLngLiteral, LatLngTuple } from 'leaflet'
 
 import type { Route } from '~~/prisma/generated/client'
 
 const props = defineProps<{
   route: IAPIRoute | null
   routeGroups: IAPIRouteGroup[]
-  mapClickLatLng?: LatLng
+  mapClickLatLng?: LatLngLiteral
 }>()
 
 const emit = defineEmits<{

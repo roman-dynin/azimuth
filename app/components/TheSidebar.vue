@@ -1,11 +1,11 @@
 <script lang="ts" setup>
-import type { LatLng } from 'leaflet'
+import type { LatLngLiteral } from 'leaflet'
 
 const props = defineProps<{
   routeGroups: IAPIRouteGroup[]
   routes: IAPIRoute[]
   spots: IAPISpot[]
-  mapClickLatLng?: LatLng
+  mapClickLatLng?: LatLngLiteral
 }>()
 
 const emit = defineEmits<{

@@ -1,62 +1,84 @@
 <script lang="ts" setup>
-import type { LatLng, Map as LeafletMap } from 'leaflet'
+import type { LatLngLiteral, LayerGroup, Map as LeafletMap } from 'leaflet'
 
 import L from 'leaflet'
 
-const { data, status } = useAsyncData(
-  'data',
-  async () => {
-    const [
-      routeGroups,
-      routes,
-      spots,
-    ] = await Promise.all([
-      $fetch<IAPIRouteGroup[]>('/api/routeGroups'),
-      $fetch<IAPIRoute[]>('/api/routes'),
-      $fetch<IAPISpot[]>('/api/spots'),
-    ])
+const { data, status, refresh } = useAsyncData('data', async () => {
+  const [routeGroups, routes, spots] = await Promise.all([
+    $fetch<IAPIRouteGroup[]>('/api/routeGroups'),
+    $fetch<IAPIRoute[]>('/api/routes'),
+    $fetch<IAPISpot[]>('/api/spots'),
+  ])
 
-    return {
-      routeGroups,
-      routes,
-      spots,
-    }
-  },
-)
+  return {
+    routeGroups,
+    routes,
+    spots,
+  }
+})
 
 const routeGroupProxies = shallowRef<Record<number, RouteGroupProxy>>()
 
 const map = shallowRef<LeafletMap>()
 
-const mapClickLatLng = shallowRef<LatLng>()
+const mapClickLatLng = shallowRef<LatLngLiteral>()
+
+const contentLayer = shallowRef<LayerGroup>()
+
+const { show: showSidebar, open: openSidebar } = useSidebar()
+
+const picking = ref(false)
+
+const { init: initCoordinatesPreview } = useCoordinatesPreview()
+
+const { init: initMapFocus } = useMapFocus()
+
+let initialRender = true
+
+function render() {
+  if (!data.value || !map.value || !contentLayer.value) {
+    return
+  }
+
+  contentLayer.value.clearLayers()
+
+  routeGroupProxies.value = getRouteGroupProxies(data.value.routeGroups)
+
+  renderRouteGroups(contentLayer.value, routeGroupProxies.value)
+
+  renderRoutes(map.value, contentLayer.value, routeGroupProxies.value, data.value.routes, initialRender)
+
+  renderSpots(contentLayer.value, data.value.spots)
+
+  initialRender = false
+}
 
 watch(status, (value) => {
   if (value !== 'success') {
     return
   }
 
-  if (!data.value) {
-    return
-  }
-
-  if (!map.value) {
-    return
-  }
-
-  routeGroupProxies.value = getRouteGroupProxies(data.value.routeGroups)
-
-  renderRoutes(map.value, routeGroupProxies.value, data.value.routes)
-
-  renderRouteGroups(map.value, routeGroupProxies.value)
-
-  renderSpots(map.value, data.value.spots)
+  render()
 })
 
 onMounted(() => {
   map.value = L.map('map', { attributionControl: false })
 
+  map.value.createPane('markers').style.zIndex = '450'
+
+  map.value!.on('click', (event) => {
+    mapClickLatLng.value = map.value!.mouseEventToLatLng(event.originalEvent) as LatLngLiteral
+  })
+
+  contentLayer.value = L.layerGroup().addTo(map.value)
+
+  initCoordinatesPreview(map.value)
+
+  initMapFocus(map.value)
+
   const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
+    maxNativeZoom: 19,
+    maxZoom: 22,
   }).addTo(map.value)
 
   const googleSatelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -64,16 +86,12 @@ onMounted(() => {
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
   })
 
-  L.control.layers({
-    // eslint-disable-next-line style/quote-props
-    'Карта': osmLayer,
-    // eslint-disable-next-line style/quote-props
-    'Спутник': googleSatelliteLayer,
-  }).addTo(map.value!)
-
-  map.value!.on('click', (event) => {
-    mapClickLatLng.value = map.value!.mouseEventToLatLng(event.originalEvent)
-  })
+  L.control
+    .layers({
+      Карта: osmLayer,
+      Спутник: googleSatelliteLayer,
+    })
+    .addTo(map.value!)
 })
 
 useHead({
@@ -82,25 +100,49 @@ useHead({
 </script>
 
 <template>
-  <div class="flex flex-col h-dvh">
-    <div class="grow">
-      <div id="map" class="h-full" />
+  <div class="flex h-dvh flex-col">
+    <div class="relative grow">
+      <div
+        id="map"
+        class="h-full"
+        :style="picking ? { cursor: 'crosshair' } : {}"
+      />
+      <TheSidebar
+        v-if="showSidebar && data"
+        :route-groups="data.routeGroups"
+        :routes="data.routes"
+        :spots="data.spots"
+        :map-click-lat-lng="mapClickLatLng"
+        @refresh="refresh"
+        @toggle-picking="picking = $event"
+      />
     </div>
-    <div class="flex justify-between px-2 py-2 bg-black text-gray-500 text-xs">
+    <div class="flex items-center justify-between bg-black px-2 py-2 text-xs text-gray-500">
       <div class="hidden lg:block">
         {{ mapClickLatLng }}
       </div>
       <div>
-        <span class="hidden lg:inline">Сделано с любовью!</span> 🐙 <a href="https://github.com/roman-dynin/azimuth" target="_blank">@roman-dynin</a>
+        <span class="hidden lg:inline">Сделано с любовью!</span> 🐙
+        <a
+          href="https://github.com/roman-dynin/azimuth"
+          target="_blank"
+          >@roman-dynin</a
+        >
       </div>
+      <button
+        class="cursor-pointer text-gray-400 hover:text-white"
+        @click="openSidebar"
+      >
+        Управление
+      </button>
     </div>
   </div>
 </template>
 
 <style lang="css">
-@import "tailwindcss";
+@import 'tailwindcss';
 
-@import "leaflet/dist/leaflet.css";
+@import 'leaflet/dist/leaflet.css';
 
 :root {
   --emoji-marker-size: 32px;
@@ -108,13 +150,29 @@ useHead({
 
 .marker--emoji {
   font-size: calc(var(--emoji-marker-size) * 0.5);
-  line-height:    var(--emoji-marker-size);
+  line-height: var(--emoji-marker-size);
   text-align: center;
 
   background: #ffffff;
   border-radius: 50%;
 
-  width:  var(--emoji-marker-size) !important;
+  width: var(--emoji-marker-size) !important;
   height: var(--emoji-marker-size) !important;
+}
+
+.marker--preview {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.15);
+  }
 }
 </style>
