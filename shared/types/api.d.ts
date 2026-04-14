@@ -13,6 +13,7 @@ export interface IAPIRoute {
   id: number
   routeGroupId: number | null
   guideline: boolean
+  anchorWaypointId: number | null
   title: string | null
   description: string | null
   color: string | null
@@ -28,9 +29,11 @@ export interface IAPIWaypoint {
   title: string | null
   description: string | null
   color: string | null
+  targetWaypointId: number | null
   azimuth: number | null
   seconds: number | null
   distance: number | null
+  order: number | null
   lat: number
   lng: number
 }
