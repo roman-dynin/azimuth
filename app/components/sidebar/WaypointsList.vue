@@ -8,6 +8,8 @@ const emit = defineEmits<{
   editWaypoint: [waypoint: IAPIWaypoint]
 }>()
 
+const { getAuthHeaders } = useAuth()
+
 const waypointsCopy = ref([...props.route.waypoints])
 
 watch(
@@ -58,6 +60,7 @@ async function onDrop(targetIndex: number, event: DragEvent) {
 
   await $fetch('/api/waypoints/reorder', {
     method: 'PATCH',
+    headers: getAuthHeaders(),
     body: waypoints.map((waypoint, index) => ({
       id: waypoint.id,
       order: index + 1,

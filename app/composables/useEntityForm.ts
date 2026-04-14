@@ -4,6 +4,8 @@ export function useEntityForm(
   buildBody: () => Record<string, any>,
   onSuccess: () => void,
 ) {
+  const { getAuthHeaders } = useAuth()
+
   const saving = ref(false)
 
   const removing = ref(false)
@@ -17,9 +19,9 @@ export function useEntityForm(
       const body = buildBody()
 
       if (entityId !== null) {
-        await $fetch(`${endpoint}/${entityId}`, { method: 'PATCH', body })
+        await $fetch(`${endpoint}/${entityId}`, { method: 'PATCH', body, headers: getAuthHeaders() })
       } else {
-        await $fetch(endpoint, { method: 'POST', body })
+        await $fetch(endpoint, { method: 'POST', body, headers: getAuthHeaders() })
       }
 
       onSuccess()
@@ -36,7 +38,7 @@ export function useEntityForm(
     removing.value = true
 
     try {
-      await $fetch(`${endpoint}/${entityId}`, { method: 'DELETE' })
+      await $fetch(`${endpoint}/${entityId}`, { method: 'DELETE', headers: getAuthHeaders() })
 
       onSuccess()
     } catch (error: any) {

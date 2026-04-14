@@ -5,6 +5,14 @@ defineProps<{
 }>()
 
 const { view, back, close } = useSidebar()
+
+const { authorized, logout } = useAuth()
+
+function onLogout() {
+  logout()
+
+  close()
+}
 </script>
 
 <template>
@@ -29,11 +37,21 @@ const { view, back, close } = useSidebar()
         </div>
       </div>
     </div>
-    <button
-      class="ml-2 shrink-0 cursor-pointer text-lg leading-none text-gray-400 hover:text-white"
-      @click="close"
-    >
-      ✕
-    </button>
+    <div class="ml-2 flex shrink-0 items-center gap-2">
+      <button
+        v-if="authorized"
+        class="cursor-pointer text-xs text-gray-500 hover:text-white"
+        title="Выйти"
+        @click="onLogout"
+      >
+        🏃🚪
+      </button>
+      <button
+        class="cursor-pointer text-lg leading-none text-gray-400 hover:text-white"
+        @click="close"
+      >
+        ✕
+      </button>
+    </div>
   </div>
 </template>

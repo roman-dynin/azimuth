@@ -27,6 +27,24 @@ const contentLayer = shallowRef<LayerGroup>()
 
 const { show: showSidebar, open: openSidebar } = useSidebar()
 
+const { authorized, init: initAuth } = useAuth()
+
+const showAuthModal = ref(false)
+
+function handleManagementClick() {
+  if (authorized.value) {
+    openSidebar()
+  } else {
+    showAuthModal.value = true
+  }
+}
+
+function onAuthSuccess() {
+  showAuthModal.value = false
+
+  openSidebar()
+}
+
 const picking = ref(false)
 
 const { init: initCoordinatesPreview } = useCoordinatesPreview()
@@ -62,7 +80,7 @@ watch(status, (value) => {
 })
 
 onMounted(() => {
-  map.value = L.map('map', { attributionControl: false })
+  map.value = L.map('map', { attributionControl: false }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM)
 
   map.value.createPane('markers').style.zIndex = '450'
 
@@ -71,6 +89,8 @@ onMounted(() => {
   })
 
   contentLayer.value = L.layerGroup().addTo(map.value)
+
+  initAuth()
 
   initCoordinatesPreview(map.value)
 
@@ -107,6 +127,10 @@ useHead({
         class="h-full"
         :style="picking ? { cursor: 'crosshair' } : {}"
       />
+      <TheAuthModal
+        v-if="showAuthModal"
+        @success="onAuthSuccess"
+      />
       <TheSidebar
         v-if="showSidebar && data"
         :route-groups="data.routeGroups"
@@ -131,7 +155,7 @@ useHead({
       </div>
       <button
         class="cursor-pointer text-gray-400 hover:text-white"
-        @click="openSidebar"
+        @click="handleManagementClick"
       >
         Управление
       </button>

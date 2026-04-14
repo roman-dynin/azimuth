@@ -14,6 +14,10 @@ export default defineNuxtConfig({
     ],
   },
 
+  runtimeConfig: {
+    authCode: '',
+  },
+
   ssr: false,
 
   modules: [
