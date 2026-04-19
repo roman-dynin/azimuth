@@ -65,6 +65,8 @@ export function getWaypointTooltip(waypoint: IAPIWaypoint): string {
 export function getSpotTooltip(spot: IAPISpot): string {
   const parts: string[] = []
 
+  parts.push(`<span style="color: #d1d5db; font-size: 9px">ID: ${spot.id}</span>`)
+
   if (spot.title) {
     parts.push(spot.title)
   }
