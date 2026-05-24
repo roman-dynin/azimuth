@@ -1,6 +1,6 @@
 import type { Buffer } from 'node:buffer'
 
-import { unlink } from 'node:fs/promises'
+import { mkdir, unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import process from 'node:process'
 
@@ -15,6 +15,8 @@ export async function saveCompressedImage(buffer: Buffer): Promise<string> {
   const filename = `${generateId()}.jpg`
 
   try {
+    await mkdir(PHOTOS_DIR, { recursive: true })
+
     await sharp(buffer)
       .rotate()
       .resize(1280, 1280, { fit: 'inside', withoutEnlargement: true })
