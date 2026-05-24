@@ -39,9 +39,9 @@ function setAnchorLatLng(lat: number, lng: number): void {
 if (props.route) {
   loading.value = true
 
-  const rawRoute = await $fetch<Route>(`/api/routes/${props.route.id}`)
+  const { id: _id, ...editable } = await $fetch<Route>(`/api/routes/${props.route.id}`)
 
-  Object.assign(form, rawRoute)
+  Object.assign(form, editable)
 
   loading.value = false
 }

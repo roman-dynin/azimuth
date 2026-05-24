@@ -26,9 +26,9 @@ const form = reactive({
   order: null as number | null,
 })
 
-const rawWaypoint = await $fetch<Waypoint>(`/api/waypoints/${props.waypoint.id}`)
+const { id: _id, routeId: _routeId, ...editable } = await $fetch<Waypoint>(`/api/waypoints/${props.waypoint.id}`)
 
-Object.assign(form, rawWaypoint)
+Object.assign(form, editable)
 
 loading.value = false
 
