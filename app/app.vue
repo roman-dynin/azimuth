@@ -4,16 +4,18 @@ import type { LatLngLiteral, LayerGroup, Map as LeafletMap } from 'leaflet'
 import L from 'leaflet'
 
 const { data, status, refresh } = useAsyncData('data', async () => {
-  const [routeGroups, routes, spots] = await Promise.all([
+  const [routeGroups, routes, spots, photos] = await Promise.all([
     $fetch<IAPIRouteGroup[]>('/api/routeGroups'),
     $fetch<IAPIRoute[]>('/api/routes'),
     $fetch<IAPISpot[]>('/api/spots'),
+    $fetch<IAPIPhoto[]>('/api/photos'),
   ])
 
   return {
     routeGroups,
     routes,
     spots,
+    photos,
   }
 })
 
@@ -67,6 +69,8 @@ function render() {
   renderRouteGroups(contentLayer.value, routeGroupProxies.value)
 
   renderSpots(contentLayer.value, data.value.spots)
+
+  renderPhotos(contentLayer.value, data.value.photos)
 
   initialRender = false
 }
@@ -136,10 +140,12 @@ useHead({
         :route-groups="data.routeGroups"
         :routes="data.routes"
         :spots="data.spots"
+        :photos="data.photos"
         :map-click-lat-lng="mapClickLatLng"
         @refresh="refresh"
         @toggle-picking="picking = $event"
       />
+      <ThePhotoViewer />
     </div>
     <div class="flex items-center justify-between bg-black px-2 py-2 text-xs text-gray-500">
       <div class="hidden lg:block">

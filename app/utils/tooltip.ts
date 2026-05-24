@@ -81,3 +81,19 @@ export function getSpotTooltip(spot: IAPISpot): string {
 
   return parts.join('<br>')
 }
+
+export function getPhotoTooltip(photo: IAPIPhoto): string {
+  const parts: string[] = []
+
+  parts.push(`<span style="color: #d1d5db; font-size: 9px">ID: ${photo.id}</span>`)
+
+  if (photo.title) {
+    parts.push(photo.title)
+  }
+
+  if (photo.description) {
+    parts.push(photo.description)
+  }
+
+  return parts.join('<br>')
+}

@@ -5,6 +5,7 @@ const props = defineProps<{
   routeGroups: IAPIRouteGroup[]
   routes: IAPIRoute[]
   spots: IAPISpot[]
+  photos: IAPIPhoto[]
   mapClickLatLng?: LatLngLiteral
 }>()
 
@@ -19,15 +20,18 @@ const {
   editingRoute,
   editingWaypoint,
   editingSpot,
+  editingPhoto,
   selectedRoute,
   openRouteGroup,
   openRoute,
   openWaypoints,
   openWaypoint,
   openSpot,
+  openPhoto,
   syncRouteGroups,
   syncRoutes,
   syncSpots,
+  syncPhotos,
 } = useSidebar()
 
 watch(() => props.routeGroups, syncRouteGroups)
@@ -35,18 +39,22 @@ watch(() => props.routeGroups, syncRouteGroups)
 watch(() => props.routes, syncRoutes)
 
 watch(() => props.spots, syncSpots)
+
+watch(() => props.photos, syncPhotos)
 </script>
 
 <template>
-  <div class="absolute top-0 right-0 bottom-0 z-[1000] flex w-80 flex-col bg-gray-900 text-white shadow-2xl">
+  <div class="absolute top-0 right-0 bottom-0 z-[1000] flex w-full flex-col bg-gray-900 text-white shadow-2xl sm:w-80">
     <SidebarHome
       v-if="view === 'home'"
       :route-groups="routeGroups"
       :routes="routes"
       :spots="spots"
+      :photos="photos"
       @open-route-group="openRouteGroup"
       @open-route="openRoute"
       @open-spot="openSpot"
+      @open-photo="openPhoto"
       @open-waypoints="openWaypoints"
     />
 
@@ -81,6 +89,14 @@ watch(() => props.spots, syncSpots)
     <FormSpot
       v-else-if="view === 'spot'"
       :spot="editingSpot"
+      :map-click-lat-lng="mapClickLatLng"
+      @refresh="emit('refresh')"
+      @toggle-picking="emit('togglePicking', $event)"
+    />
+
+    <FormPhoto
+      v-else-if="view === 'photo'"
+      :photo="editingPhoto"
       :map-click-lat-lng="mapClickLatLng"
       @refresh="emit('refresh')"
       @toggle-picking="emit('togglePicking', $event)"

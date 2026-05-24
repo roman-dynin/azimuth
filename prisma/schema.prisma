@@ -52,3 +52,12 @@ model Spot {
   lng         Float
   depth       Float?
 }
+
+model Photo {
+  id          Int     @id @default(autoincrement())
+  title       String?
+  description String?
+  filename    String
+  lat         Float
+  lng         Float
+}

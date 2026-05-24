@@ -78,4 +78,15 @@ export const spotCreateSchema = z
 
 export const spotPatchSchema = spotCreateSchema.partial()
 
+export const photoCreateSchema = z
+  .object({
+    title: nullableString,
+    description: nullableString,
+    lat: z.coerce.number().min(-90).max(90),
+    lng: z.coerce.number().min(-180).max(180),
+  })
+  .strict()
+
+export const photoPatchSchema = photoCreateSchema.partial()
+
 export const authSchema = z.object({ code: z.string() }).strict()
