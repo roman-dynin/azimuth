@@ -7,7 +7,7 @@ import process from 'node:process'
 import { customAlphabet } from 'nanoid'
 import sharp from 'sharp'
 
-const PHOTOS_DIR = join(process.cwd(), 'public', 'uploads', 'photos')
+const PHOTOS_DIR = process.env.PHOTOS_DIR || join(process.cwd(), 'public', 'uploads', 'photos')
 
 const generateId = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 12)
 

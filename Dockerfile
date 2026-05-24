@@ -6,13 +6,13 @@ FROM base AS dependencies
 
 COPY package.json package-lock.json ./
 
-RUN npm ci
+RUN npm ci --ignore-scripts
 
 FROM dependencies AS build
 
 COPY . .
 
-RUN npx prisma generate && npm run build
+RUN npx prisma generate && npx nuxi prepare && npm run build
 
 FROM base AS runtime
 
