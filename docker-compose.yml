@@ -19,5 +19,5 @@ services:
     ports:
       - '3000:3000'
     volumes:
-      - ./docker/.data/photos:/data/photos
+      - /var/lib/azimuth/photos:/data/photos
     restart: unless-stopped
