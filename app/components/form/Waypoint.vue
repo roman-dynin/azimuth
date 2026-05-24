@@ -18,6 +18,7 @@ const form = reactive({
   description: null as string | null,
   poi: false,
   color: null as string | null,
+  targetWaypointId: null as number | null,
   azimuth: null as number | null,
   distance: null as number | null,
   seconds: null as number | null,
@@ -34,11 +35,10 @@ loading.value = false
 const { saving, removing, error, save, remove } = useEntityForm(
   '/api/waypoints',
   props.waypoint.id,
-  () => {
-    const { azimuth, distance, seconds, ...data } = form
-
-    return props.waypoint.targetWaypointId ? data : { ...data, azimuth, distance, seconds }
-  },
+  () =>
+    form.targetWaypointId
+      ? { ...form, azimuth: null, distance: null, seconds: null }
+      : { ...form, targetWaypointId: null },
   () => {
     emit('refresh')
 
@@ -80,7 +80,13 @@ const { saving, removing, error, save, remove } = useEntityForm(
 
       <FieldColorPicker v-model="form.color" />
 
-      <template v-if="!waypoint.targetWaypointId">
+      <FieldNumber
+        v-model.number="form.targetWaypointId"
+        label="Целевая точка (Waypoint ID)"
+        placeholder="ID точки"
+      />
+
+      <template v-if="!form.targetWaypointId">
         <FieldNumber
           v-model="form.azimuth"
           label="Азимут (°)"

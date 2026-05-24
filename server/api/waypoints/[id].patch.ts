@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {
     description?: string | null
     color?: string | null
     poi?: boolean
+    targetWaypointId?: number | null
     azimuth?: number | null
     distance?: number | null
     seconds?: number | null

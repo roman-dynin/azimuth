@@ -71,6 +71,7 @@ async function onDrop(targetIndex: number, event: DragEvent) {
 }
 
 const form = reactive({
+  targetWaypointId: null as number | null,
   azimuth: null as number | null,
   distance: null as number | null,
   seconds: null as number | null,
@@ -81,10 +82,14 @@ const { saving, error, save } = useEntityForm(
   null,
   () => ({
     routeId: props.route.id,
-    ...form,
     order: waypointsCopy.value.length + 1,
+    ...(form.targetWaypointId
+      ? { targetWaypointId: form.targetWaypointId }
+      : { azimuth: form.azimuth, distance: form.distance, seconds: form.seconds }),
   }),
   () => {
+    form.targetWaypointId = null
+
     form.azimuth = null
 
     form.distance = null
@@ -145,26 +150,34 @@ const { saving, error, save } = useEntityForm(
     <div class="text-xs tracking-wide text-gray-400 uppercase">Новая точка</div>
 
     <FieldNumber
-      v-model.number="form.azimuth"
-      label="Азимут (°)"
-      :min="0"
-      :max="359"
+      v-model.number="form.targetWaypointId"
+      label="Целевая точка (Waypoint ID)"
+      placeholder="ID точки"
     />
 
-    <div class="flex gap-2">
+    <template v-if="!form.targetWaypointId">
       <FieldNumber
-        v-model.number="form.distance"
-        label="Дистанция (м.)"
+        v-model.number="form.azimuth"
+        label="Азимут (°)"
         :min="0"
-        :step="1"
+        :max="359"
       />
 
-      <FieldNumber
-        v-model.number="form.seconds"
-        label="Время (сек.)"
-        :min="0"
-      />
-    </div>
+      <div class="flex gap-2">
+        <FieldNumber
+          v-model.number="form.distance"
+          label="Дистанция (м.)"
+          :min="0"
+          :step="1"
+        />
+
+        <FieldNumber
+          v-model.number="form.seconds"
+          label="Время (сек.)"
+          :min="0"
+        />
+      </div>
+    </template>
 
     <div
       v-if="error"
