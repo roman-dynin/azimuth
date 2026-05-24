@@ -188,6 +188,7 @@ useHead({
       <TheAuthModal
         v-if="showAuthModal"
         @success="onAuthSuccess"
+        @close="showAuthModal = false"
       />
       <TheSidebar
         v-if="showSidebar && data"
@@ -228,7 +229,7 @@ useHead({
           {{ isDark ? '☀️' : '🌙' }}
         </button>
         <button
-          class="cursor-pointer text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+          class="hidden cursor-pointer text-gray-600 hover:text-black lg:inline dark:text-gray-400 dark:hover:text-white"
           @click="handleManagementClick"
         >
           Управление

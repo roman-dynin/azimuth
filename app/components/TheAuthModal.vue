@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-const emit = defineEmits<{ success: [] }>()
+const emit = defineEmits<{ success: [], close: [] }>()
 
 const { authorize } = useAuth()
 
@@ -31,11 +31,23 @@ async function submit() {
 </script>
 
 <template>
-  <div class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60">
+  <div
+    class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60"
+    @click.self="emit('close')"
+  >
     <form
-      class="flex w-72 flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-900"
+      class="relative flex w-72 flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-900"
       @submit.prevent="submit"
     >
+      <button
+        type="button"
+        class="absolute top-2 right-2 cursor-pointer text-lg leading-none text-gray-400 hover:text-gray-700 dark:hover:text-white"
+        aria-label="Закрыть"
+        @click="emit('close')"
+      >
+        ×
+      </button>
+
       <div class="text-sm font-medium text-gray-900 dark:text-white">Введите код доступа</div>
 
       <input
