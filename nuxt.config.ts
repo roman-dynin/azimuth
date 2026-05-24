@@ -64,6 +64,8 @@ export default defineNuxtConfig({
     },
     workbox: {
       globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
+      additionalManifestEntries: [{ url: '/', revision: `${Date.now()}` }],
+      navigateFallback: '/',
       navigateFallbackDenylist: [/^\/api\//, /^\/uploads\//],
       clientsClaim: true,
       skipWaiting: true,
