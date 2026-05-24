@@ -31,6 +31,10 @@ const { show: showSidebar, open: openSidebar } = useSidebar()
 
 const { authorized, init: initAuth } = useAuth()
 
+const { online } = useOnline()
+
+const visiblePhotos = computed(() => (online.value ? (data.value?.photos ?? []) : []))
+
 const showAuthModal = ref(false)
 
 function handleManagementClick() {
@@ -70,7 +74,7 @@ function render() {
 
   renderSpots(contentLayer.value, data.value.spots)
 
-  renderPhotos(contentLayer.value, data.value.photos)
+  renderPhotos(contentLayer.value, visiblePhotos.value)
 
   initialRender = false
 }
@@ -82,6 +86,8 @@ watch(status, (value) => {
 
   render()
 })
+
+watch(online, render)
 
 onMounted(() => {
   map.value = L.map('map', { attributionControl: false }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM)
@@ -140,7 +146,7 @@ useHead({
         :route-groups="data.routeGroups"
         :routes="data.routes"
         :spots="data.spots"
-        :photos="data.photos"
+        :photos="visiblePhotos"
         :map-click-lat-lng="mapClickLatLng"
         @refresh="refresh"
         @toggle-picking="picking = $event"
@@ -151,7 +157,13 @@ useHead({
       <div class="hidden lg:block">
         {{ mapClickLatLng }}
       </div>
-      <div>
+      <div class="flex items-center gap-2">
+        <span
+          v-if="!online"
+          class="rounded bg-red-900/40 px-2 py-0.5 text-red-300"
+        >
+          Нет интернета
+        </span>
         <span class="hidden lg:inline">Сделано с любовью!</span> 🐙
         <a
           href="https://github.com/roman-dynin/azimuth"

@@ -4,13 +4,15 @@ import { unlink } from 'node:fs/promises'
 import { join } from 'node:path'
 import process from 'node:process'
 
-import { nanoid } from 'nanoid'
+import { customAlphabet } from 'nanoid'
 import sharp from 'sharp'
 
 const PHOTOS_DIR = join(process.cwd(), 'public', 'uploads', 'photos')
 
+const generateId = customAlphabet('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', 12)
+
 export async function saveCompressedImage(buffer: Buffer): Promise<string> {
-  const filename = `${nanoid(12)}.jpg`
+  const filename = `${generateId()}.jpg`
 
   try {
     await sharp(buffer)
