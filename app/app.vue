@@ -31,7 +31,7 @@ const { show: showSidebar, open: openSidebar } = useSidebar()
 
 const { authorized, init: initAuth } = useAuth()
 
-const { online } = useOnline()
+const { online, setOnline } = useOnline()
 
 const visiblePhotos = computed(() => (online.value ? (data.value?.photos ?? []) : []))
 
@@ -80,11 +80,13 @@ function render() {
 }
 
 watch(status, (value) => {
-  if (value !== 'success') {
-    return
-  }
+  if (value === 'success') {
+    setOnline(true)
 
-  render()
+    render()
+  } else if (value === 'error') {
+    setOnline(false)
+  }
 })
 
 watch(online, render)

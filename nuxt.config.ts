@@ -70,6 +70,15 @@ export default defineNuxtConfig({
       cleanupOutdatedCaches: true,
       runtimeCaching: [
         {
+          urlPattern: ({ request }) => request.mode === 'navigate',
+          handler: 'NetworkFirst',
+          options: {
+            cacheName: 'pages-cache',
+            expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            networkTimeoutSeconds: 3,
+          },
+        },
+        {
           urlPattern: /\/api\/(routes|routeGroups|spots|photos)(\?.*)?$/,
           handler: 'NetworkFirst',
           options: {
