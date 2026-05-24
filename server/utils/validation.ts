@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+
 import type { ZodType } from 'zod'
 
 export async function parseBody<T>(event: H3Event, schema: ZodType<T>): Promise<T> {
