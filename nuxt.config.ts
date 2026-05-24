@@ -39,12 +39,6 @@ export default defineNuxtConfig({
     authCode: '',
   },
 
-  nitro: {
-    publicAssets: [
-      { dir: process.env.PHOTOS_DIR || 'public/uploads/photos', baseURL: '/uploads/photos', maxAge: 60 * 60 * 24 },
-    ],
-  },
-
   ssr: false,
 
   modules: ['@nuxt/eslint', '@vite-pwa/nuxt'],
