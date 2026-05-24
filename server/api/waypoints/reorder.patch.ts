@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const body = await readBody<Array<{ id: number; order: number }>>(event)
+  const items = await parseBody(event, waypointsReorderSchema)
 
-  await Promise.all(body.map(({ id, order }) => prisma.waypoint.update({ where: { id }, data: { order } })))
+  await Promise.all(items.map(({ id, order }) => prisma.waypoint.update({ where: { id }, data: { order } })))
 })

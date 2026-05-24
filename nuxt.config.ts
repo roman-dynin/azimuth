@@ -9,9 +9,14 @@ export default defineNuxtConfig({
   },
 
   vite: {
-    plugins: [
-      tailwindcss(),
-    ],
+    optimizeDeps: {
+      include: [
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
+        'leaflet', // CJS
+      ],
+    },
+    plugins: [tailwindcss()],
   },
 
   runtimeConfig: {
@@ -20,9 +25,7 @@ export default defineNuxtConfig({
 
   ssr: false,
 
-  modules: [
-    '@nuxt/eslint',
-  ],
+  modules: ['@nuxt/eslint'],
 
   typescript: {
     typeCheck: true,

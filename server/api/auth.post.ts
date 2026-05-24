@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const { code } = await readBody<{ code: string }>(event)
+  const { code } = await parseBody(event, authSchema)
 
   const { authCode } = useRuntimeConfig()
 

@@ -25,8 +25,8 @@ export function useEntityForm(
       }
 
       onSuccess()
-    } catch (error: any) {
-      error.value = error?.data?.message || error?.message || 'Всё пошло по пизде'
+    } catch (err: any) {
+      error.value = err?.data?.message || err?.message || 'Не удалось выполнить операцию'
     } finally {
       saving.value = false
     }
@@ -41,8 +41,8 @@ export function useEntityForm(
       await $fetch(`${endpoint}/${entityId}`, { method: 'DELETE', headers: getAuthHeaders() })
 
       onSuccess()
-    } catch (error: any) {
-      error.value = error?.data?.message || error?.message || 'Всё пошло по пизде'
+    } catch (err: any) {
+      error.value = err?.data?.message || err?.message || 'Не удалось выполнить операцию'
     } finally {
       removing.value = false
     }

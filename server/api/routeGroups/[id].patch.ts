@@ -1,12 +1,7 @@
 export default defineEventHandler(async (event) => {
   const id = Number(getRouterParam(event, 'id'))
 
-  const body = await readBody<{
-    title?: string | null
-    description?: string | null
-    color?: string | null
-    weight?: number | null
-  }>(event)
+  const data = await parseBody(event, routeGroupPatchSchema)
 
-  return prisma.routeGroup.update({ where: { id }, data: body })
+  return prisma.routeGroup.update({ where: { id }, data })
 })

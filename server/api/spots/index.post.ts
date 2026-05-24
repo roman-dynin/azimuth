@@ -1,12 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{
-    title?: string | null
-    description?: string | null
-    emoji: string
-    lat: number
-    lng: number
-    depth?: number | null
-  }>(event)
+  const data = await parseBody(event, spotCreateSchema)
 
-  return prisma.spot.create({ data: body })
+  return prisma.spot.create({ data })
 })

@@ -1,145 +1,20 @@
+import type { Waypoint } from '~~/prisma/generated/client'
+
 export default defineEventHandler(async () => {
-  const routes: IAPIRoute[] = []
+  const [rawRoutes, rawWaypoints] = await Promise.all([
+    prisma.route.findMany({ orderBy: { id: 'asc' } }),
+    prisma.waypoint.findMany({ orderBy: [{ order: { sort: 'asc', nulls: 'last' } }, { id: 'asc' }] }),
+  ])
 
-  const rawRoutes = await prisma.route.findMany({ orderBy: { id: 'asc' } })
+  const waypointsByRouteId = new Map<number, Waypoint[]>()
 
-  const handledRouteIds = new Set<number>()
+  for (const waypoint of rawWaypoints) {
+    const list = waypointsByRouteId.get(waypoint.routeId) ?? []
 
-  const waypointsLatLng: Record<number, [number, number]> = {}
+    list.push(waypoint)
 
-  while (handledRouteIds.size < rawRoutes.length) {
-    for (const route of rawRoutes) {
-      if (handledRouteIds.has(route.id)) {
-        continue
-      }
-
-      let previousLat: number
-
-      let previousLng: number
-
-      if (route.anchorWaypointId) {
-        const waypointLatLng = waypointsLatLng[route.anchorWaypointId]
-
-        if (!waypointLatLng) {
-          continue
-        }
-
-        ;[previousLat, previousLng] = waypointLatLng
-      } else {
-        previousLat = route.anchorLat!
-
-        previousLng = route.anchorLng!
-      }
-
-      const anchorLat = previousLat
-
-      const anchorLng = previousLng
-
-      const waypoints: IAPIWaypoint[] = []
-
-      const rawWaypoints = await prisma.waypoint.findMany({
-        where: {
-          routeId: route.id,
-        },
-        orderBy: [{ order: { sort: 'asc', nulls: 'last' } }, { id: 'asc' }],
-      })
-
-      let prorogue = false
-
-      for (const waypoint of rawWaypoints) {
-        let latLng: [number, number] | undefined
-
-        let seconds: number | null = waypoint.seconds
-
-        let distance: number | null = waypoint.distance
-
-        let azimuth: number | null = waypoint.azimuth
-
-        if (waypoint.targetWaypointId) {
-          latLng = waypointsLatLng[waypoint.targetWaypointId]
-
-          if (!latLng) {
-            prorogue = true
-
-            break
-          }
-
-          const [targetLat, targetLng] = latLng
-
-          const latOffset = (targetLat - previousLat) * METERS_PER_DEGREE
-
-          const lngOffset = (targetLng - previousLng) * METERS_PER_DEGREE * Math.cos(previousLat * (Math.PI / 180))
-
-          distance = Math.sqrt(latOffset ** 2 + lngOffset ** 2)
-
-          seconds = distance / DIVER_SPEED_MULTIPLIER
-
-          azimuth = Math.round(((Math.atan2(lngOffset, latOffset) * 180) / Math.PI + 360) % 360)
-
-          previousLat = targetLat
-
-          previousLng = targetLng
-
-          waypointsLatLng[waypoint.id] = latLng
-        } else {
-          distance = distance ?? seconds! * DIVER_SPEED_MULTIPLIER
-
-          seconds = distance !== null ? distance / DIVER_SPEED_MULTIPLIER : seconds
-
-          const radians = waypoint.azimuth! * (Math.PI / 180)
-
-          const latOffset = (distance * Math.cos(radians)) / METERS_PER_DEGREE
-
-          const lngOffset =
-            (distance * Math.sin(radians)) / (METERS_PER_DEGREE * Math.cos(previousLat * (Math.PI / 180)))
-
-          previousLat += latOffset
-
-          previousLng += lngOffset
-
-          latLng = [previousLat, previousLng]
-
-          waypointsLatLng[waypoint.id] = latLng
-        }
-
-        waypoints.push({
-          id: waypoint.id,
-          poi: waypoint.poi,
-          title: waypoint.title,
-          description: waypoint.description,
-          color: waypoint.color,
-          targetWaypointId: waypoint.targetWaypointId,
-          azimuth,
-          seconds,
-          distance,
-          depth: waypoint.depth,
-          order: waypoint.order,
-          lat: previousLat,
-          lng: previousLng,
-        })
-      }
-
-      if (prorogue) {
-        continue
-      }
-
-      routes.push({
-        id: route.id,
-        routeGroupId: route.routeGroupId,
-        guideline: route.guideline,
-        anchorWaypointId: route.anchorWaypointId,
-        title: route.title,
-        description: route.description,
-        color: route.color,
-        weight: route.weight,
-        anchorLat,
-        anchorLng,
-        waypoints,
-      })
-
-      handledRouteIds.add(route.id)
-    }
+    waypointsByRouteId.set(waypoint.routeId, list)
   }
 
-  return routes
+  return buildRoutes(rawRoutes, waypointsByRouteId)
 })

@@ -1,10 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{
-    title?: string | null
-    description?: string | null
-    color?: string | null
-    weight?: number | null
-  }>(event)
+  const data = await parseBody(event, routeGroupCreateSchema)
 
-  return prisma.routeGroup.create({ data: body })
+  return prisma.routeGroup.create({ data })
 })
