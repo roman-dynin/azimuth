@@ -26,6 +26,8 @@ export function useEntityForm(
         await $fetch(endpoint, { method: 'POST', body, headers: getAuthHeaders() })
       }
 
+      await invalidateApiCache()
+
       onSuccess()
     } catch (err: any) {
       error.value = err?.data?.message || err?.message || 'Не удалось выполнить операцию'
@@ -43,6 +45,8 @@ export function useEntityForm(
 
     try {
       await $fetch(`${endpoint}/${entityId}`, { method: 'DELETE', headers: getAuthHeaders() })
+
+      await invalidateApiCache()
 
       onSuccess()
     } catch (err: any) {

@@ -67,6 +67,8 @@ async function onDrop(targetIndex: number, event: DragEvent) {
     })),
   })
 
+  await invalidateApiCache()
+
   emit('refresh')
 }
 
