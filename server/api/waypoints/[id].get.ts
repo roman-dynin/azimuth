@@ -1,11 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const id = Number(getRouterParam(event, 'id'))
+  const id = parseId(event)
 
-  const waypoint = await prisma.waypoint.findUnique({ where: { id } })
-
-  if (!waypoint) {
-    throw createError({ statusCode: 404, message: 'Точка не найдена' })
-  }
-
-  return waypoint
+  return requireById(prisma.waypoint, id, 'Точка не найдена')
 })

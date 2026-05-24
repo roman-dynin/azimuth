@@ -3,12 +3,20 @@ import type { LatLngLiteral, LayerGroup, Map as LeafletMap } from 'leaflet'
 
 import L from 'leaflet'
 
-const { data, status, refresh } = useAsyncData('data', async () => {
+function fetchOrEmpty<T>(url: string): Promise<T[]> {
+  return $fetch<T[]>(url).catch((err) => {
+    console.warn(`[fetch] ${url}`, err)
+
+    return []
+  })
+}
+
+const { data, refresh } = useAsyncData('data', async () => {
   const [routeGroups, routes, spots, photos] = await Promise.all([
-    $fetch<IAPIRouteGroup[]>('/api/routeGroups'),
-    $fetch<IAPIRoute[]>('/api/routes'),
-    $fetch<IAPISpot[]>('/api/spots'),
-    $fetch<IAPIPhoto[]>('/api/photos'),
+    fetchOrEmpty<IAPIRouteGroup>('/api/routeGroups'),
+    fetchOrEmpty<IAPIRoute>('/api/routes'),
+    fetchOrEmpty<IAPISpot>('/api/spots'),
+    fetchOrEmpty<IAPIPhoto>('/api/photos'),
   ])
 
   return {
@@ -31,7 +39,7 @@ const { show: showSidebar, open: openSidebar } = useSidebar()
 
 const { authorized, init: initAuth } = useAuth()
 
-const { online, setOnline } = useOnline()
+const { online } = useOnline()
 
 const visiblePhotos = computed(() => (online.value ? (data.value?.photos ?? []) : []))
 
@@ -79,17 +87,11 @@ function render() {
   initialRender = false
 }
 
-watch(status, (value) => {
-  if (value === 'success') {
-    setOnline(true)
-
-    render()
-  } else if (value === 'error') {
-    setOnline(false)
-  }
-})
+watch(data, render)
 
 watch(online, render)
+
+const apiUpdatesChannel = shallowRef<BroadcastChannel>()
 
 onMounted(() => {
   map.value = L.map('map', { attributionControl: false }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM)
@@ -101,6 +103,12 @@ onMounted(() => {
   })
 
   contentLayer.value = L.layerGroup().addTo(map.value)
+
+  if ('BroadcastChannel' in window) {
+    apiUpdatesChannel.value = new BroadcastChannel('api-cache-updates')
+
+    apiUpdatesChannel.value.addEventListener('message', () => refresh())
+  }
 
   initAuth()
 
@@ -126,8 +134,13 @@ onMounted(() => {
     .addTo(map.value!)
 })
 
+onBeforeUnmount(() => {
+  apiUpdatesChannel.value?.close()
+})
+
 useHead({
-  title: 'Azimuth',
+  title: 'Керамзитное',
+  style: [{ innerHTML: `:root { --emoji-marker-size: ${WAYPOINT_EMOJI_SIZE_PX}px; }` }],
 })
 </script>
 
@@ -187,10 +200,6 @@ useHead({
 @import 'tailwindcss';
 
 @import 'leaflet/dist/leaflet.css';
-
-:root {
-  --emoji-marker-size: 32px;
-}
 
 .marker--emoji {
   font-size: calc(var(--emoji-marker-size) * 0.5);

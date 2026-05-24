@@ -27,9 +27,5 @@ export function useOnline() {
     initialized = true
   }
 
-  function setOnline(value: boolean) {
-    online.value = value
-  }
-
-  return { online: readonly(online), setOnline }
+  return { online: readonly(online) }
 }

@@ -1,13 +1,13 @@
 export default defineEventHandler(async (event) => {
-  const id = Number(getRouterParam(event, 'id'))
+  const id = parseId(event)
 
   const { fields, file } = await parseMultipartBody(event, photoPatchSchema)
+
+  const existing = await requireById(prisma.photo, id, 'Фото не найдено')
 
   const data: Record<string, unknown> = { ...fields }
 
   if (file) {
-    const existing = await prisma.photo.findUniqueOrThrow({ where: { id } })
-
     data.filename = await saveCompressedImage(file.data)
 
     await deletePhotoFile(existing.filename)

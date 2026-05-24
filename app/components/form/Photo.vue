@@ -13,8 +13,6 @@ const emit = defineEmits<{
 
 const { back } = useSidebar()
 
-const { getAuthHeaders } = useAuth()
-
 const { open: openLightbox } = useLightbox()
 
 const form = reactive({
@@ -56,12 +54,6 @@ const { picking, toggle } = useCoordinatesPicking(
   (value) => emit('togglePicking', value),
 )
 
-const saving = ref(false)
-
-const removing = ref(false)
-
-const error = ref('')
-
 function buildFormData(): FormData {
   const formData = new FormData()
 
@@ -78,6 +70,23 @@ function buildFormData(): FormData {
   return formData
 }
 
+const {
+  saving,
+  removing,
+  error,
+  save: saveEntity,
+  remove,
+} = useEntityForm(
+  '/api/photos',
+  props.photo?.id ?? null,
+  buildFormData,
+  () => {
+    emit('refresh')
+
+    back()
+  },
+)
+
 async function save() {
   if (!props.photo && !file.value) {
     error.value = 'Выберите файл'
@@ -85,43 +94,7 @@ async function save() {
     return
   }
 
-  saving.value = true
-
-  try {
-    const body = buildFormData()
-
-    if (props.photo) {
-      await $fetch(`/api/photos/${props.photo.id}`, { method: 'PATCH', body, headers: getAuthHeaders() })
-    } else {
-      await $fetch('/api/photos', { method: 'POST', body, headers: getAuthHeaders() })
-    }
-
-    emit('refresh')
-
-    back()
-  } catch (err: any) {
-    error.value = err?.data?.message || err?.message || 'Не удалось выполнить операцию'
-  } finally {
-    saving.value = false
-  }
-}
-
-async function remove() {
-  if (!props.photo) return
-
-  removing.value = true
-
-  try {
-    await $fetch(`/api/photos/${props.photo.id}`, { method: 'DELETE', headers: getAuthHeaders() })
-
-    emit('refresh')
-
-    back()
-  } catch (err: any) {
-    error.value = err?.data?.message || err?.message || 'Не удалось выполнить операцию'
-  } finally {
-    removing.value = false
-  }
+  await saveEntity()
 }
 </script>
 

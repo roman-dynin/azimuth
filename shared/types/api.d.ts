@@ -2,7 +2,7 @@ import type { FeatureGroup } from 'leaflet'
 
 import type { Photo, RouteGroup, Spot } from '~~/prisma/generated/client'
 
-export interface IAPIRouteGroup extends RouteGroup {}
+export type IAPIRouteGroup = RouteGroup
 
 export interface RouteGroupProxy {
   value: IAPIRouteGroup
@@ -29,6 +29,7 @@ export interface IAPIWaypoint {
   title: string | null
   description: string | null
   color: string | null
+  emoji: string | null
   targetWaypointId: number | null
   azimuth: number | null
   seconds: number | null
@@ -39,6 +40,6 @@ export interface IAPIWaypoint {
   lng: number
 }
 
-export interface IAPISpot extends Spot {}
+export type IAPISpot = Spot
 
-export interface IAPIPhoto extends Photo {}
+export type IAPIPhoto = Photo

@@ -24,6 +24,7 @@ export const waypointCreateSchema = z
     title: nullableString,
     description: nullableString,
     color: nullableString,
+    emoji: nullableString,
     poi: z.boolean().optional(),
     targetWaypointId: nullablePositiveId,
     azimuth: z.number().int().min(0).max(359).nullable().optional(),

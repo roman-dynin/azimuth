@@ -7,11 +7,7 @@ export async function parseBody<T>(event: H3Event, schema: ZodType<T>): Promise<
   const result = schema.safeParse(raw)
 
   if (!result.success) {
-    const message = result.error.issues
-      .map((issue) => (issue.path.length ? `${issue.path.join('.')}: ${issue.message}` : issue.message))
-      .join('; ')
-
-    throw createError({ statusCode: 422, statusMessage: 'Validation Error', message })
+    throw createError({ statusCode: 422, statusMessage: 'Validation Error', message: formatZodError(result.error) })
   }
 
   return result.data

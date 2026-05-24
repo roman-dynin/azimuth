@@ -1,7 +1,7 @@
 export default defineEventHandler(async (event) => {
-  const id = Number(getRouterParam(event, 'id'))
+  const id = parseId(event)
 
-  const existing = await prisma.photo.findUniqueOrThrow({ where: { id } })
+  const existing = await requireById(prisma.photo, id, 'Фото не найдено')
 
   await deletePhotoFile(existing.filename)
 

@@ -35,6 +35,7 @@ model Waypoint {
   title            String?
   description      String?
   color            String?
+  emoji            String?
   targetWaypointId Int?
   order            Float?
   azimuth          Int?

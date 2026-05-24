@@ -18,6 +18,7 @@ const form = reactive({
   description: null as string | null,
   poi: false,
   color: null as string | null,
+  emoji: null as string | null,
   targetWaypointId: null as number | null,
   azimuth: null as number | null,
   distance: null as number | null,
@@ -79,6 +80,12 @@ const { saving, removing, error, save, remove } = useEntityForm(
       />
 
       <FieldColorPicker v-model="form.color" />
+
+      <FieldText
+        v-model.trim="form.emoji"
+        label="Emoji"
+        placeholder="🐙"
+      />
 
       <FieldNumber
         v-model.number="form.targetWaypointId"

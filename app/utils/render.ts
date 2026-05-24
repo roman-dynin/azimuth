@@ -67,6 +67,31 @@ export function renderRouteWaypoints(contentLayer: LayerGroup, routeColor: strin
     }
 
     marker.addTo(contentLayer)
+
+    if (waypoint.emoji) {
+      const [emojiLat, emojiLng] = forwardOffset(
+        waypoint.lat,
+        waypoint.lng,
+        WAYPOINT_EMOJI_ANGLE_DEG,
+        WAYPOINT_EMOJI_OFFSET_METERS,
+      )
+
+      const emojiMarker = new L.Marker([emojiLat, emojiLng], {
+        pane: 'markers',
+        icon: new L.DivIcon({
+          className: 'marker--emoji',
+          html: waypoint.emoji,
+          iconSize: [WAYPOINT_EMOJI_SIZE_PX, WAYPOINT_EMOJI_SIZE_PX],
+          iconAnchor: [WAYPOINT_EMOJI_SIZE_PX / 2, WAYPOINT_EMOJI_SIZE_PX / 2],
+        }),
+      })
+
+      if (tooltip) {
+        emojiMarker.bindTooltip(tooltip)
+      }
+
+      emojiMarker.addTo(contentLayer)
+    }
   })
 }
 

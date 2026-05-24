@@ -14,7 +14,7 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#000000' },
         { name: 'apple-mobile-web-app-capable', content: 'yes' },
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
-        { name: 'apple-mobile-web-app-title', content: 'Azimuth' },
+        { name: 'apple-mobile-web-app-title', content: 'Керамзитное' },
       ],
     },
   },
@@ -29,6 +29,7 @@ export default defineNuxtConfig({
         '@vue/devtools-core',
         '@vue/devtools-kit',
         'leaflet', // CJS
+        'workbox-window',
       ],
     },
     plugins: [tailwindcss()],
@@ -49,8 +50,8 @@ export default defineNuxtConfig({
       installPrompt: true,
     },
     manifest: {
-      name: 'Azimuth',
-      short_name: 'Azimuth',
+      name: 'Керамзитное',
+      short_name: 'Керамзитное',
       description: 'Подводная навигация по оз. Керамзитное',
       theme_color: '#000000',
       background_color: '#111827',
@@ -82,11 +83,24 @@ export default defineNuxtConfig({
         },
         {
           urlPattern: /\/api\/(routes|routeGroups|spots|photos)(\?.*)?$/,
-          handler: 'NetworkFirst',
+          handler: 'StaleWhileRevalidate',
           options: {
             cacheName: 'api-cache',
             expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            networkTimeoutSeconds: 5,
+            cacheableResponse: { statuses: [0, 200] },
+            broadcastUpdate: {
+              channelName: 'api-cache-updates',
+              options: { headersToCheck: ['content-length', 'etag', 'last-modified'] },
+            },
+          },
+        },
+        {
+          urlPattern: /\/uploads\/photos\//,
+          handler: 'CacheFirst',
+          options: {
+            cacheName: 'photos-cache',
+            expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            cacheableResponse: { statuses: [0, 200] },
           },
         },
         {

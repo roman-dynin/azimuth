@@ -1,7 +1,7 @@
 export function useEntityForm(
   endpoint: string,
   entityId: number | null,
-  buildBody: () => Record<string, any>,
+  buildBody: () => Record<string, unknown> | FormData,
   onSuccess: () => void,
 ) {
   const { getAuthHeaders } = useAuth()
@@ -13,6 +13,8 @@ export function useEntityForm(
   const error = ref('')
 
   async function save() {
+    error.value = ''
+
     saving.value = true
 
     try {
@@ -34,6 +36,8 @@ export function useEntityForm(
 
   async function remove() {
     if (entityId === null) return
+
+    error.value = ''
 
     removing.value = true
 

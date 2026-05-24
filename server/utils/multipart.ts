@@ -36,11 +36,7 @@ export async function parseMultipartBody<T>(
   const result = schema.safeParse(fields)
 
   if (!result.success) {
-    const message = result.error.issues
-      .map((issue) => (issue.path.length ? `${issue.path.join('.')}: ${issue.message}` : issue.message))
-      .join('; ')
-
-    throw createError({ statusCode: 422, statusMessage: 'Validation Error', message })
+    throw createError({ statusCode: 422, statusMessage: 'Validation Error', message: formatZodError(result.error) })
   }
 
   return { fields: result.data, file }

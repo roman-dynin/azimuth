@@ -66,7 +66,7 @@ function buildRoute(
 
   const waypoints: IAPIWaypoint[] = []
 
-  for (const waypoint of rawWaypoints) {
+  for (const { routeId: _routeId, ...waypoint } of rawWaypoints) {
     let seconds: number | null = waypoint.seconds
 
     let distance: number | null = waypoint.distance
@@ -99,17 +99,10 @@ function buildRoute(
     waypointsLatLng[waypoint.id] = [previousLat, previousLng]
 
     waypoints.push({
-      id: waypoint.id,
-      poi: waypoint.poi,
-      title: waypoint.title,
-      description: waypoint.description,
-      color: waypoint.color,
-      targetWaypointId: waypoint.targetWaypointId,
+      ...waypoint,
       azimuth,
       seconds,
       distance,
-      depth: waypoint.depth,
-      order: waypoint.order,
       lat: previousLat,
       lng: previousLng,
     })
