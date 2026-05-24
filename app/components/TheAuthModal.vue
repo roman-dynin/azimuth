@@ -33,15 +33,15 @@ async function submit() {
 <template>
   <div class="fixed inset-0 z-[2000] flex items-center justify-center bg-black/60">
     <form
-      class="flex w-72 flex-col gap-4 rounded-xl bg-gray-900 p-6 shadow-2xl"
+      class="flex w-72 flex-col gap-4 rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-900"
       @submit.prevent="submit"
     >
-      <div class="text-sm font-medium text-white">Введите код доступа</div>
+      <div class="text-sm font-medium text-gray-900 dark:text-white">Введите код доступа</div>
 
       <input
         v-model="code"
         type="password"
-        class="rounded-lg bg-gray-800 px-3 py-2 text-sm text-white outline-none focus:ring-1 focus:ring-gray-500"
+        class="rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-1 focus:ring-gray-500 dark:bg-gray-800 dark:text-white"
         placeholder="Код"
         autofocus
         autocomplete="off"
@@ -49,7 +49,7 @@ async function submit() {
 
       <div
         v-if="error"
-        class="text-xs text-red-400"
+        class="text-xs text-red-700 dark:text-red-400"
       >
         Неверный код
       </div>
@@ -57,7 +57,7 @@ async function submit() {
       <button
         type="submit"
         :disabled="loading || !code"
-        class="rounded-lg bg-gray-700 px-3 py-2 text-sm text-white hover:bg-gray-600 disabled:opacity-40"
+        class="rounded-lg bg-gray-200 px-3 py-2 text-sm text-gray-900 hover:bg-gray-300 disabled:opacity-40 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
       >
         Войти
       </button>

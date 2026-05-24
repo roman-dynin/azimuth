@@ -11,9 +11,9 @@ const emit = defineEmits<{
 <template>
   <div class="px-4 pt-4 pb-4">
     <div class="mb-2 flex items-center justify-between">
-      <span class="text-xs tracking-wide text-gray-400 uppercase">Споты</span>
+      <span class="text-xs tracking-wide text-gray-600 uppercase dark:text-gray-400">Споты</span>
       <button
-        class="cursor-pointer text-xs text-gray-400 hover:text-white"
+        class="cursor-pointer text-xs text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
         @click="emit('open', null)"
       >
         + Создать
@@ -21,14 +21,14 @@ const emit = defineEmits<{
     </div>
     <div
       v-if="spots.length === 0"
-      class="py-1 text-xs text-gray-600"
+      class="py-1 text-xs text-gray-400 dark:text-gray-600"
     >
       Нет спотов
     </div>
     <div
       v-for="spot in spots"
       :key="spot.id"
-      class="group flex cursor-pointer items-center justify-between py-1.5 text-gray-300 hover:text-white"
+      class="group flex cursor-pointer items-center justify-between py-1.5 text-gray-700 hover:text-black dark:text-gray-300 dark:hover:text-white"
       @click="emit('open', spot)"
     >
       <div class="flex min-w-0 items-center gap-2">
@@ -38,7 +38,7 @@ const emit = defineEmits<{
           <div class="truncate text-sm">{{ spot.title || '—' }}</div>
         </div>
       </div>
-      <span class="text-xs text-gray-600 group-hover:text-gray-400">→</span>
+      <span class="text-xs text-gray-400 group-hover:text-gray-600 dark:text-gray-600 dark:group-hover:text-gray-400">→</span>
     </div>
   </div>
 </template>

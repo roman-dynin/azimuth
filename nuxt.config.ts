@@ -16,6 +16,9 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
         { name: 'apple-mobile-web-app-title', content: 'Керамзитное' },
       ],
+      script: [
+        { src: '/theme.js', tagPosition: 'head' },
+      ],
     },
   },
 

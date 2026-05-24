@@ -24,7 +24,7 @@ const emit = defineEmits<{
       @open="emit('openRouteGroup', $event)"
     />
 
-    <div class="border-t border-gray-800" />
+    <div class="border-t border-gray-200 dark:border-gray-800" />
 
     <SidebarRoutesList
       :routes="routes"
@@ -32,14 +32,14 @@ const emit = defineEmits<{
       @open-waypoints="emit('openWaypoints', $event)"
     />
 
-    <div class="border-t border-gray-800" />
+    <div class="border-t border-gray-200 dark:border-gray-800" />
 
     <SidebarSpotsList
       :spots="spots"
       @open="emit('openSpot', $event)"
     />
 
-    <div class="border-t border-gray-800" />
+    <div class="border-t border-gray-200 dark:border-gray-800" />
 
     <SidebarPhotosList
       :photos="photos"

@@ -41,6 +41,8 @@ const { authorized, init: initAuth } = useAuth()
 
 const { online } = useOnline()
 
+const { isDark, toggle: toggleColorScheme } = useColorScheme()
+
 const visiblePhotos = computed(() => (online.value ? (data.value?.photos ?? []) : []))
 
 const showAuthModal = ref(false)
@@ -119,19 +121,50 @@ onMounted(() => {
   const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxNativeZoom: 19,
     maxZoom: 22,
-  }).addTo(map.value)
+  })
+
+  const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxNativeZoom: 20,
+    maxZoom: 22,
+    subdomains: 'abcd',
+  })
 
   const googleSatelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
     maxZoom: 19,
     subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
   })
 
-  L.control
+  ;(isDark.value ? darkLayer : osmLayer).addTo(map.value)
+
+  let layerControl = L.control
     .layers({
-      Карта: osmLayer,
+      Карта: isDark.value ? darkLayer : osmLayer,
       Спутник: googleSatelliteLayer,
     })
     .addTo(map.value!)
+
+  watch(isDark, (dark) => {
+    if (!map.value) {
+      return
+    }
+
+    const [add, remove] = dark ? [darkLayer, osmLayer] : [osmLayer, darkLayer]
+
+    if (map.value.hasLayer(remove)) {
+      map.value.removeLayer(remove)
+
+      add.addTo(map.value)
+    }
+
+    map.value.removeControl(layerControl)
+
+    layerControl = L.control
+      .layers({
+        Карта: dark ? darkLayer : osmLayer,
+        Спутник: googleSatelliteLayer,
+      })
+      .addTo(map.value)
+  })
 })
 
 onBeforeUnmount(() => {
@@ -168,14 +201,14 @@ useHead({
       />
       <ThePhotoViewer />
     </div>
-    <div class="flex items-center justify-between bg-black px-2 py-2 text-xs text-gray-500">
+    <div class="flex items-center justify-between bg-gray-50 px-2 py-2 text-xs text-gray-500 dark:bg-black">
       <div class="hidden lg:block">
         {{ mapClickLatLng }}
       </div>
       <div class="flex items-center gap-2">
         <span
           v-if="!online"
-          class="rounded bg-red-900/40 px-2 py-0.5 text-red-300"
+          class="rounded bg-red-100 px-2 py-0.5 text-red-700 dark:bg-red-900/40 dark:text-red-300"
         >
           Нет интернета
         </span>
@@ -186,12 +219,21 @@ useHead({
           >@roman-dynin</a
         >
       </div>
-      <button
-        class="cursor-pointer text-gray-400 hover:text-white"
-        @click="handleManagementClick"
-      >
-        Управление
-      </button>
+      <div class="flex items-center gap-3">
+        <button
+          class="cursor-pointer text-base leading-none"
+          :title="isDark ? 'Светлая тема' : 'Тёмная тема'"
+          @click="toggleColorScheme"
+        >
+          {{ isDark ? '☀️' : '🌙' }}
+        </button>
+        <button
+          class="cursor-pointer text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+          @click="handleManagementClick"
+        >
+          Управление
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -200,6 +242,8 @@ useHead({
 @import 'tailwindcss';
 
 @import 'leaflet/dist/leaflet.css';
+
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
 
 .marker--emoji {
   font-size: calc(var(--emoji-marker-size) * 0.5);
@@ -211,6 +255,45 @@ useHead({
 
   width: var(--emoji-marker-size) !important;
   height: var(--emoji-marker-size) !important;
+}
+
+[data-theme='dark'] .marker--emoji {
+  background: #1f2937;
+}
+
+[data-theme='dark'] .leaflet-popup-content-wrapper,
+[data-theme='dark'] .leaflet-popup-tip,
+[data-theme='dark'] .leaflet-tooltip {
+  background: #1f2937;
+  color: #f3f4f6;
+  border: none;
+}
+
+[data-theme='dark'] .leaflet-tooltip-top::before {
+  border-top-color: #1f2937;
+}
+
+[data-theme='dark'] .leaflet-tooltip-bottom::before {
+  border-bottom-color: #1f2937;
+}
+
+[data-theme='dark'] .leaflet-tooltip-left::before {
+  border-left-color: #1f2937;
+}
+
+[data-theme='dark'] .leaflet-tooltip-right::before {
+  border-right-color: #1f2937;
+}
+
+[data-theme='dark'] .leaflet-control-layers,
+[data-theme='dark'] .leaflet-bar a {
+  background: #1f2937;
+  color: #f3f4f6;
+  border-color: #374151;
+}
+
+[data-theme='dark'] .leaflet-control-layers-separator {
+  border-top-color: #374151;
 }
 
 .marker--preview {

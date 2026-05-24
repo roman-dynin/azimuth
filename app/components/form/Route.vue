@@ -122,16 +122,16 @@ function onSave() {
         <input
           v-model="form.guideline"
           type="checkbox"
-          class="accent-white"
+          class="accent-black dark:accent-white"
         />
         <span class="text-sm">Ходовик</span>
       </label>
 
       <div class="space-y-1">
-        <div class="text-xs tracking-wide text-gray-400 uppercase">Группа</div>
+        <div class="text-xs tracking-wide text-gray-600 uppercase dark:text-gray-400">Группа</div>
         <select
           v-model.number="form.routeGroupId"
-          class="w-full rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-sm focus:border-gray-500 focus:outline-none"
+          class="w-full rounded border border-gray-200 bg-gray-100 px-2 py-1.5 text-sm focus:border-gray-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800"
         >
           <option :value="null">Без группы</option>
           <option
@@ -163,7 +163,7 @@ function onSave() {
 
       <div
         v-if="!route && !hasAnchor"
-        class="text-xs text-red-400"
+        class="text-xs text-red-700 dark:text-red-400"
       >
         Укажи Waypoint ID или координаты якоря
       </div>

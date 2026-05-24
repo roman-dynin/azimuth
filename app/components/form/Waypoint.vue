@@ -64,7 +64,7 @@ const { saving, removing, error, save, remove } = useEntityForm(
         <input
           v-model="form.poi"
           type="checkbox"
-          class="accent-white"
+          class="accent-black dark:accent-white"
         />
         <span class="text-sm">Точка интереса</span>
       </label>

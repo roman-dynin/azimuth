@@ -4,7 +4,7 @@ const model = defineModel<string | null>({ default: null })
 
 <template>
   <div class="space-y-1">
-    <div class="text-xs tracking-wide text-gray-400 uppercase">Цвет</div>
+    <div class="text-xs tracking-wide text-gray-600 uppercase dark:text-gray-400">Цвет</div>
     <input
       :value="model"
       type="color"

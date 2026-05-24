@@ -16,11 +16,11 @@ function onLogout() {
 </script>
 
 <template>
-  <div class="flex shrink-0 items-center justify-between border-b border-gray-700 px-4 py-3">
+  <div class="flex shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-gray-700">
     <div class="flex min-w-0 items-center gap-2">
       <button
         v-if="view !== 'home'"
-        class="shrink-0 cursor-pointer text-sm text-gray-400 hover:text-white"
+        class="shrink-0 cursor-pointer text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
         @click="back"
       >
         ←
@@ -31,7 +31,7 @@ function onLogout() {
         </div>
         <div
           v-if="subtitle"
-          class="truncate text-xs text-gray-400"
+          class="truncate text-xs text-gray-600 dark:text-gray-400"
         >
           {{ subtitle }}
         </div>
@@ -40,14 +40,14 @@ function onLogout() {
     <div class="ml-2 flex shrink-0 items-center gap-2">
       <button
         v-if="authorized"
-        class="cursor-pointer text-xs text-gray-500 hover:text-white"
+        class="cursor-pointer text-xs text-gray-500 hover:text-black dark:hover:text-white"
         title="Выйти"
         @click="onLogout"
       >
         🏃🚪
       </button>
       <button
-        class="cursor-pointer text-lg leading-none text-gray-400 hover:text-white"
+        class="cursor-pointer text-lg leading-none text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
         @click="close"
       >
         ✕

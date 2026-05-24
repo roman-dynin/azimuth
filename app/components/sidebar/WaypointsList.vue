@@ -114,7 +114,7 @@ const { saving, error, save } = useEntityForm(
       <li
         v-for="(waypoint, index) in waypointsCopy"
         :key="waypoint.id"
-        class="flex cursor-pointer items-center gap-2 border-b border-gray-800 px-3 py-2 select-none hover:bg-gray-800"
+        class="flex cursor-pointer items-center gap-2 border-b border-gray-200 px-3 py-2 select-none hover:bg-gray-100 dark:border-gray-800 dark:hover:bg-gray-800"
         :class="{
           'border-t-2 border-t-blue-500': dragOverIndex === index && dragIndex !== index,
         }"
@@ -125,10 +125,10 @@ const { saving, error, save } = useEntityForm(
         @dragleave="onDragLeave"
         @drop="onDrop(index, $event)"
       >
-        <span class="shrink-0 cursor-grab text-lg leading-none text-gray-600 active:cursor-grabbing">⠿</span>
+        <span class="shrink-0 cursor-grab text-lg leading-none text-gray-400 active:cursor-grabbing dark:text-gray-600">⠿</span>
         <div class="min-w-0 flex-1">
           <div class="text-xs text-gray-500">ID: {{ waypoint.id }}</div>
-          <div class="truncate text-sm text-gray-200">
+          <div class="truncate text-sm text-gray-800 dark:text-gray-200">
             <span v-if="waypoint.targetWaypointId">→ #{{ waypoint.targetWaypointId }}</span>
             <span v-else-if="waypoint.azimuth !== null">
               {{ waypoint.azimuth }}°
@@ -139,7 +139,7 @@ const { saving, error, save } = useEntityForm(
           </div>
           <div
             v-if="waypoint.title"
-            class="truncate text-xs text-gray-400"
+            class="truncate text-xs text-gray-600 dark:text-gray-400"
           >
             {{ waypoint.title }}
           </div>
@@ -148,8 +148,8 @@ const { saving, error, save } = useEntityForm(
     </ul>
   </div>
 
-  <div class="shrink-0 space-y-2 border-t border-gray-700 px-4 py-3">
-    <div class="text-xs tracking-wide text-gray-400 uppercase">Новая точка</div>
+  <div class="shrink-0 space-y-2 border-t border-gray-200 px-4 py-3 dark:border-gray-700">
+    <div class="text-xs tracking-wide text-gray-600 uppercase dark:text-gray-400">Новая точка</div>
 
     <FieldNumber
       v-model.number="form.targetWaypointId"
@@ -183,14 +183,14 @@ const { saving, error, save } = useEntityForm(
 
     <div
       v-if="error"
-      class="text-xs text-red-400"
+      class="text-xs text-red-700 dark:text-red-400"
     >
       {{ error }}
     </div>
 
     <button
       :disabled="saving"
-      class="w-full cursor-pointer rounded bg-white py-1.5 text-sm text-black disabled:opacity-50"
+      class="w-full cursor-pointer rounded bg-gray-900 py-1.5 text-sm text-white disabled:opacity-50 dark:bg-white dark:text-black"
       @click="save"
     >
       {{ saving ? 'Добавление...' : '+ Добавить' }}

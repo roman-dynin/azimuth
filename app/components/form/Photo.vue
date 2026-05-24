@@ -104,7 +104,7 @@ async function save() {
   <div class="flex-1 space-y-4 overflow-y-auto px-4 py-4">
     <div
       v-if="photo"
-      class="overflow-hidden rounded border border-gray-700"
+      class="overflow-hidden rounded border border-gray-200 dark:border-gray-700"
     >
       <img
         :src="`/uploads/photos/${photo.filename}`"
@@ -115,13 +115,13 @@ async function save() {
     </div>
 
     <div class="space-y-1">
-      <div class="text-xs tracking-wide text-gray-400 uppercase">
+      <div class="text-xs tracking-wide text-gray-600 uppercase dark:text-gray-400">
         {{ photo ? 'Заменить файл' : 'Файл' }}
       </div>
       <input
         type="file"
         accept="image/*"
-        class="w-full text-sm text-gray-300 file:mr-2 file:cursor-pointer file:rounded file:border-0 file:bg-gray-800 file:px-2 file:py-1 file:text-sm file:text-white hover:file:bg-gray-700"
+        class="w-full text-sm text-gray-700 file:mr-2 file:cursor-pointer file:rounded file:border-0 file:bg-gray-100 file:px-2 file:py-1 file:text-sm file:text-gray-900 hover:file:bg-gray-200 dark:text-gray-300 dark:file:bg-gray-800 dark:file:text-white dark:hover:file:bg-gray-700"
         @change="onFileChange"
       />
     </div>

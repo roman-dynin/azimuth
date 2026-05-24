@@ -16,11 +16,11 @@ const emit = defineEmits<{
 <template>
   <div class="space-y-1">
     <div class="flex items-center justify-between">
-      <div class="text-xs tracking-wide text-gray-400 uppercase">
+      <div class="text-xs tracking-wide text-gray-600 uppercase dark:text-gray-400">
         {{ label ?? 'Координаты' }}
       </div>
       <button
-        :class="picking ? 'animate-pulse text-blue-400' : 'text-gray-400 hover:text-white'"
+        :class="picking ? 'animate-pulse text-blue-400' : 'text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white'"
         class="cursor-pointer text-xs"
         @click="emit('togglePicking')"
       >
