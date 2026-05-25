@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { LatLngLiteral, LayerGroup, Map as LeafletMap } from 'leaflet'
+import type { FeatureGroup, LatLngLiteral, LayerGroup, Map as LeafletMap } from 'leaflet'
 
 import L from 'leaflet'
 
@@ -34,6 +34,10 @@ const map = shallowRef<LeafletMap>()
 const mapClickLatLng = shallowRef<LatLngLiteral>()
 
 const contentLayer = shallowRef<LayerGroup>()
+
+const depthLayer = shallowRef<FeatureGroup>()
+
+const depthLayerVisible = ref(false)
 
 const { show: showSidebar, open: openSidebar } = useSidebar()
 
@@ -86,6 +90,12 @@ function render() {
 
   renderPhotos(contentLayer.value, visiblePhotos.value)
 
+  if (depthLayer.value) {
+    const allWaypoints = data.value.routes.flatMap((route) => route.waypoints)
+
+    renderDepthHalos(depthLayer.value, allWaypoints, data.value.spots)
+  }
+
   initialRender = false
 }
 
@@ -100,11 +110,42 @@ onMounted(() => {
 
   map.value.createPane('markers').style.zIndex = '450'
 
+  const depthPane = map.value.createPane('depth')
+
+  depthPane.style.zIndex = '350'
+
+  depthPane.style.filter = 'blur(16px)'
+
+  depthPane.style.pointerEvents = 'none'
+
   map.value!.on('click', (event) => {
     mapClickLatLng.value = map.value!.mouseEventToLatLng(event.originalEvent) as LatLngLiteral
   })
 
   contentLayer.value = L.layerGroup().addTo(map.value)
+
+  depthLayer.value = L.featureGroup()
+
+  if (depthLayerVisible.value) {
+    depthLayer.value.addTo(map.value)
+  }
+
+  createDepthToggleControl({
+    initialVisible: depthLayerVisible.value,
+    onToggle: (visible) => {
+      depthLayerVisible.value = visible
+
+      if (!map.value || !depthLayer.value) {
+        return
+      }
+
+      if (visible) {
+        depthLayer.value.addTo(map.value)
+      } else {
+        depthLayer.value.removeFrom(map.value)
+      }
+    },
+  }).addTo(map.value)
 
   if ('BroadcastChannel' in window) {
     apiUpdatesChannel.value = new BroadcastChannel('api-cache-updates')
@@ -295,6 +336,84 @@ useHead({
 
 [data-theme='dark'] .leaflet-control-layers-separator {
   border-top-color: #374151;
+}
+
+.depth-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  box-shadow: none;
+}
+
+.depth-toggle__button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  text-decoration: none;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  background: #ffffff;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.depth-toggle--active .depth-toggle__button {
+  box-shadow: 0 0 0 2px #1f9e89;
+}
+
+[data-theme='dark'] .depth-toggle__button {
+  background: #1f2937;
+}
+
+.depth-toggle__legend {
+  display: none;
+  padding: 5px 8px;
+  width: 140px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  font-size: 10px;
+  color: #374151;
+  backdrop-filter: blur(4px);
+}
+
+.depth-toggle--active .depth-toggle__legend {
+  display: block;
+}
+
+.depth-toggle__legend-bar {
+  height: 8px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #fde725,
+    #b5de2b,
+    #6ece58,
+    #35b779,
+    #1f9e89,
+    #26828e,
+    #31688e,
+    #3e4989,
+    #482878,
+    #440154
+  );
+}
+
+.depth-toggle__legend-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+[data-theme='dark'] .depth-toggle__legend {
+  background: rgba(31, 41, 55, 0.92);
+  color: #f3f4f6;
+  border-color: #374151;
 }
 
 .marker--preview {

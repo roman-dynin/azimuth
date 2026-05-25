@@ -1,4 +1,4 @@
-import type { LatLngTuple, LayerGroup, Map as LeafletMap } from 'leaflet'
+import type { FeatureGroup, LatLngTuple, LayerGroup, Map as LeafletMap } from 'leaflet'
 
 import L from 'leaflet'
 
@@ -112,6 +112,42 @@ export function renderSpots(contentLayer: LayerGroup, spots: IAPISpot[]): void {
     }
 
     marker.addTo(contentLayer)
+  })
+}
+
+export function renderDepthHalos(depthLayer: FeatureGroup, waypoints: IAPIWaypoint[], spots: IAPISpot[]): void {
+  depthLayer.clearLayers()
+
+  function drawHalo(lat: number, lng: number, depth: number): void {
+    const color = getDepthColor(depth)
+
+    DEPTH_HALO_RINGS.forEach((ring) => {
+      L.circle([lat, lng], {
+        radius: DEPTH_HALO_RADIUS_METERS * ring.scale,
+        color,
+        fillColor: color,
+        fillOpacity: ring.opacity,
+        stroke: false,
+        pane: 'depth',
+        interactive: false,
+      }).addTo(depthLayer)
+    })
+  }
+
+  waypoints.forEach((waypoint) => {
+    if (waypoint.depth === null) {
+      return
+    }
+
+    drawHalo(waypoint.lat, waypoint.lng, waypoint.depth)
+  })
+
+  spots.forEach((spot) => {
+    if (spot.depth === null) {
+      return
+    }
+
+    drawHalo(spot.lat, spot.lng, spot.depth)
   })
 }
 
