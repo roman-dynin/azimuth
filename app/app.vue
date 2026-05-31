@@ -37,7 +37,7 @@ const contentLayer = shallowRef<LayerGroup>()
 
 const depthLayer = shallowRef<FeatureGroup>()
 
-const depthLayerVisible = ref(false)
+const depthLayerVisible = ref(true)
 
 const { show: showSidebar, open: openSidebar } = useSidebar()
 
@@ -114,7 +114,7 @@ onMounted(() => {
 
   depthPane.style.zIndex = '350'
 
-  depthPane.style.filter = 'blur(16px)'
+  depthPane.style.filter = 'blur(50px)'
 
   depthPane.style.pointerEvents = 'none'
 

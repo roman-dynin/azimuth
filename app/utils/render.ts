@@ -134,21 +134,24 @@ export function renderDepthHalos(depthLayer: FeatureGroup, waypoints: IAPIWaypoi
     })
   }
 
-  waypoints.forEach((waypoint) => {
-    if (waypoint.depth === null) {
-      return
-    }
+  const halos: { lat: number; lng: number; depth: number }[] = []
 
-    drawHalo(waypoint.lat, waypoint.lng, waypoint.depth)
-  })
+  halos.push(
+    ...waypoints
+      .filter((waypoint) => waypoint.depth !== null)
+      .map((waypoint) => ({ lat: waypoint.lat, lng: waypoint.lng, depth: waypoint.depth! })),
+  )
 
-  spots.forEach((spot) => {
-    if (spot.depth === null) {
-      return
-    }
+  halos.push(
+    ...spots
+      .filter((spot) => spot.depth !== null)
+      .map((spot) => ({ lat: spot.lat, lng: spot.lng, depth: spot.depth! })),
+  )
 
-    drawHalo(spot.lat, spot.lng, spot.depth)
-  })
+  halos
+    .sort((a, b) => b.depth - a.depth)
+    .reverse()
+    .forEach((halo) => drawHalo(halo.lat, halo.lng, halo.depth))
 }
 
 export function renderPhotos(contentLayer: LayerGroup, photos: IAPIPhoto[]): void {

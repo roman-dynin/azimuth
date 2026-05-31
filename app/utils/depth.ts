@@ -2,7 +2,7 @@ export const MIN_DEPTH = 0
 
 export const MAX_DEPTH = 14
 
-export const DEPTH_HALO_RADIUS_METERS = 27
+export const DEPTH_HALO_RADIUS_METERS = 15
 
 export const VIRIDIS_STOPS = [
   '#fde725',
@@ -19,8 +19,7 @@ export const VIRIDIS_STOPS = [
 
 export const DEPTH_HALO_RINGS: ReadonlyArray<{ scale: number; opacity: number }> = [
   { scale: 1.0, opacity: 0.1 },
-  { scale: 0.7, opacity: 0.2 },
-  { scale: 0.4, opacity: 0.35 },
+  { scale: 0.5, opacity: 0.1 },
 ]
 
 function hexToRgb(hex: string): [number, number, number] {
