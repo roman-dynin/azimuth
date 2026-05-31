@@ -71,7 +71,7 @@ const { init: initCoordinatesPreview } = useCoordinatesPreview()
 
 const { init: initMapFocus } = useMapFocus()
 
-let initialRender = true
+const { init: initRuler, active: rulerActive, toggle: toggleRuler } = useRuler()
 
 function render() {
   if (!data.value || !map.value || !contentLayer.value) {
@@ -82,7 +82,7 @@ function render() {
 
   routeGroupProxies.value = getRouteGroupProxies(data.value.routeGroups)
 
-  renderRoutes(map.value, contentLayer.value, routeGroupProxies.value, data.value.routes, initialRender)
+  renderRoutes(contentLayer.value, routeGroupProxies.value, data.value.routes)
 
   renderRouteGroups(contentLayer.value, routeGroupProxies.value)
 
@@ -95,8 +95,6 @@ function render() {
 
     renderDepthHalos(depthLayer.value, allWaypoints, data.value.spots)
   }
-
-  initialRender = false
 }
 
 watch(data, render)
@@ -119,6 +117,10 @@ onMounted(() => {
   depthPane.style.pointerEvents = 'none'
 
   map.value!.on('click', (event) => {
+    if (rulerActive.value) {
+      return
+    }
+
     mapClickLatLng.value = map.value!.mouseEventToLatLng(event.originalEvent) as LatLngLiteral
   })
 
@@ -158,6 +160,10 @@ onMounted(() => {
   initCoordinatesPreview(map.value)
 
   initMapFocus(map.value)
+
+  initRuler(map.value)
+
+  createRulerControl({ active: rulerActive, onToggle: toggleRuler }).addTo(map.value)
 
   const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxNativeZoom: 19,
@@ -414,6 +420,38 @@ useHead({
   background: rgba(31, 41, 55, 0.92);
   color: #f3f4f6;
   border-color: #374151;
+}
+
+.ruler-toggle {
+  border: none;
+  box-shadow: none;
+}
+
+.ruler-toggle__button {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  text-decoration: none;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  background: #ffffff;
+  border-radius: 4px;
+}
+
+.ruler-toggle--active .ruler-toggle__button {
+  box-shadow: 0 0 0 2px #1f9e89;
+}
+
+[data-theme='dark'] .ruler-toggle__button {
+  background: #1f2937;
+}
+
+.ruler-label {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .marker--preview {

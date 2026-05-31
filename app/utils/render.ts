@@ -7,13 +7,11 @@ export function renderRouteGroups(contentLayer: LayerGroup, routeGroupProxies: R
 }
 
 export function renderRoutes(
-  map: LeafletMap,
   contentLayer: LayerGroup,
   routeGroupProxies: Record<number, RouteGroupProxy>,
   routes: IAPIRoute[],
-  fitBounds = false,
 ): void {
-  routes.forEach((route, routeIndex) => {
+  routes.forEach((route) => {
     const routeGroupProxy = route.routeGroupId ? routeGroupProxies[route.routeGroupId] : undefined
 
     const coordinates = [
@@ -46,10 +44,6 @@ export function renderRoutes(
     }
 
     renderRouteWaypoints(contentLayer, color, route.waypoints)
-
-    if (routeIndex === 0 && fitBounds) {
-      map.fitBounds(polyline.getBounds(), { maxZoom: DEFAULT_MAP_ZOOM })
-    }
   })
 }
 
