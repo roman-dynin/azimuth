@@ -3,7 +3,9 @@ export default defineEventHandler(async (event) => {
 
   const data = await parseBody(event, waypointPatchSchema)
 
-  await requireById(prisma.waypoint, id, 'Точка не найдена')
+  const existing = await requireById(prisma.waypoint, id, 'Точка не найдена')
 
-  return prisma.waypoint.update({ where: { id }, data })
+  assertWaypointInput({ ...existing, ...data })
+
+  return withRoutesCheck((tx) => tx.waypoint.update({ where: { id }, data }))
 })

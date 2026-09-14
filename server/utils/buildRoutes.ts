@@ -1,4 +1,40 @@
-import type { Route, Waypoint } from '~~/prisma/generated/client'
+import type { Prisma, Route, Waypoint } from '~~/prisma/generated/client'
+
+type Db = Pick<Prisma.TransactionClient, 'route' | 'waypoint'>
+
+export async function loadRoutes(db: Db, speed?: number): Promise<IAPIRoute[]> {
+  const rawRoutes = await db.route.findMany({ orderBy: { id: 'asc' } })
+
+  const rawWaypoints = await db.waypoint.findMany({
+    orderBy: [{ order: { sort: 'asc', nulls: 'last' } }, { id: 'asc' }],
+  })
+
+  const waypointsByRouteId = new Map<number, Waypoint[]>()
+
+  for (const waypoint of rawWaypoints) {
+    const list = waypointsByRouteId.get(waypoint.routeId) ?? []
+
+    list.push(waypoint)
+
+    waypointsByRouteId.set(waypoint.routeId, list)
+  }
+
+  return buildRoutes(rawRoutes, waypointsByRouteId, speed)
+}
+
+// buildRoutes ловит циклы и битые ссылки, отдельной проверки нет
+export function withRoutesCheck<T>(write: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+  return prisma.$transaction(async (tx) => {
+    // Две параллельные записи по отдельности проходят проверку графа
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(1)`
+
+    const result = await write(tx)
+
+    await loadRoutes(tx)
+
+    return result
+  })
+}
 
 export function buildRoutes(
   rawRoutes: Route[],
@@ -93,11 +129,10 @@ function buildRoute(
 
       previousLng = targetLng
     } else {
-      // distance приоритетнее seconds: если задано distance, seconds пересчитывается из него
+      // distance — измерение, seconds от него производное
       distance = distance ?? seconds! * speed
 
       seconds = distance / speed
-
       ;[previousLat, previousLng] = forwardOffset(previousLat, previousLng, waypoint.azimuth!, distance)
     }
 

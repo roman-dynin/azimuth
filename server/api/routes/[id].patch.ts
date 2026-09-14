@@ -3,7 +3,11 @@ export default defineEventHandler(async (event) => {
 
   const data = await parseBody(event, routePatchSchema)
 
-  await requireById(prisma.route, id, 'Маршрут не найден')
+  const existing = await requireById(prisma.route, id, 'Маршрут не найден')
 
-  return prisma.route.update({ where: { id }, data })
+  if (data.routeGroupId) await requireById(prisma.routeGroup, data.routeGroupId, 'Группа не найдена')
+
+  assertRouteInput({ ...existing, ...data })
+
+  return withRoutesCheck((tx) => tx.route.update({ where: { id }, data }))
 })

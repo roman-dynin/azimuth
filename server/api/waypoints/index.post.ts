@@ -1,5 +1,9 @@
 export default defineEventHandler(async (event) => {
   const data = await parseBody(event, waypointCreateSchema)
 
-  return prisma.waypoint.create({ data })
+  await requireById(prisma.route, data.routeId, 'Маршрут не найден')
+
+  assertWaypointInput(data)
+
+  return withRoutesCheck((tx) => tx.waypoint.create({ data }))
 })
