@@ -7,6 +7,7 @@ interface CreateDepthToggleControlOptions {
   onToggle: (visible: boolean) => void
 }
 
+// Не createButtonControl: у кнопки легенда
 export function createDepthToggleControl({ initialVisible, onToggle }: CreateDepthToggleControlOptions): L.Control {
   const DepthToggleControl = L.Control.extend({
     options: { position: 'bottomleft' as const },

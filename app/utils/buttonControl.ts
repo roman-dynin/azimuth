@@ -18,7 +18,6 @@ interface CreateButtonControlOptions {
   position?: L.ControlPosition
 }
 
-// Однокнопочный контрол карты (линейка, тема, настройки). Слой глубин — отдельно, у него легенда.
 export function createButtonControl({
   icon,
   title,
@@ -74,7 +73,6 @@ interface CreateToolbarControlOptions {
   position?: L.ControlPosition
 }
 
-// Несколько кнопок одним столбиком (тулбар линейки)
 export function createToolbarControl({ buttons, position = 'bottomright' }: CreateToolbarControlOptions): L.Control {
   const ToolbarControl = L.Control.extend({
     options: { position },

@@ -51,7 +51,7 @@ export function useColorScheme() {
     try {
       localStorage.setItem(STORAGE_KEY, theme.value)
     } catch {
-      // localStorage unavailable (Safari private mode etc.)
+      // Safari private mode кидает на setItem
     }
   }
 

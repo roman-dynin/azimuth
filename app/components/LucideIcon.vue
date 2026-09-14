@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { IconNode } from 'lucide'
 
-// Рендер lucide-иконки без lucide-vue-next: IconNode — это просто [tag, attrs][]
+// Без lucide-vue-next: IconNode — просто [tag, attrs][]
 withDefaults(defineProps<{ icon: IconNode; size?: number }>(), { size: 18 })
 </script>
 

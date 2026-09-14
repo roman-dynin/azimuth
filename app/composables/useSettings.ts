@@ -10,14 +10,13 @@ function readStored(): number | null {
   }
 }
 
-// Скорость дайвера в м/с. Пользовательская, живёт в localStorage; по умолчанию — константа.
 const speed = ref(readStored() ?? DIVER_SPEED_MULTIPLIER)
 
 watch(speed, (value) => {
   try {
     localStorage.setItem(STORAGE_KEY, String(value))
   } catch {
-    // localStorage unavailable (Safari private mode etc.)
+    // Safari private mode кидает на setItem
   }
 })
 
