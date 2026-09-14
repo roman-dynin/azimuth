@@ -291,7 +291,7 @@ function updateRubber(cursor: LatLngLiteral): void {
 
   if (!rubber) {
     rubber = L.polyline([], { color: COLOR, weight: 2, dashArray: '8 8', interactive: false })
-      .bindTooltip('', { sticky: true })
+      .bindTooltip('', { sticky: true, direction: 'top' })
       .addTo(map)
   }
 

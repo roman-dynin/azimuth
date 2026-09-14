@@ -48,7 +48,7 @@ export function renderRoutes(
   })
 }
 
-// POI в отдельном слое: их скрывают независимо от маршрутов
+// Смайлики точек в слое POI: их скрывают независимо от маршрутов, кружочки остаются
 export function renderRouteWaypoints(
   contentLayer: LayerGroup,
   poiLayer: LayerGroup,
@@ -56,8 +56,6 @@ export function renderRouteWaypoints(
   waypoints: IAPIWaypoint[],
 ): void {
   waypoints.forEach((waypoint) => {
-    const target = waypoint.poi ? poiLayer : contentLayer
-
     const marker = L.circleMarker([waypoint.lat, waypoint.lng], {
       ...getWaypointCircleMarkerOptions(routeColor, waypoint),
       pane: 'markers',
@@ -69,7 +67,7 @@ export function renderRouteWaypoints(
       marker.bindTooltip(tooltip)
     }
 
-    marker.addTo(target)
+    marker.addTo(contentLayer)
 
     if (waypoint.emoji) {
       // Смещение визуальное, не компасное
@@ -86,7 +84,7 @@ export function renderRouteWaypoints(
         emojiMarker.bindTooltip(tooltip)
       }
 
-      emojiMarker.addTo(target)
+      emojiMarker.addTo(poiLayer)
     }
   })
 }
