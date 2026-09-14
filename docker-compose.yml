@@ -14,10 +14,6 @@ services:
     image: ghcr.io/roman-dynin/azimuth:latest
     env_file:
       - .env
-    environment:
-      PHOTOS_DIR: /data/photos
     ports:
       - '3000:3000'
-    volumes:
-      - /var/lib/azimuth/photos:/data/photos
     restart: unless-stopped

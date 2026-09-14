@@ -5,7 +5,6 @@ type SidebarState =
   | { view: 'waypoints'; route: IAPIRoute }
   | { view: 'waypoint'; route: IAPIRoute; waypoint: IAPIWaypoint }
   | { view: 'spot'; spot: IAPISpot | null }
-  | { view: 'photo'; photo: IAPIPhoto | null }
 
 const show = ref(false)
 
@@ -23,8 +22,6 @@ export function useSidebar() {
   const editingWaypoint = computed(() => (state.value.view === 'waypoint' ? state.value.waypoint : null))
 
   const editingSpot = computed(() => (state.value.view === 'spot' ? state.value.spot : null))
-
-  const editingPhoto = computed(() => (state.value.view === 'photo' ? state.value.photo : null))
 
   const selectedRoute = computed(() =>
     state.value.view === 'waypoints' || state.value.view === 'waypoint' ? state.value.route : null,
@@ -86,12 +83,6 @@ export function useSidebar() {
     if (spot) focusOn(spot.lat, spot.lng)
   }
 
-  function openPhoto(photo: IAPIPhoto | null) {
-    state.value = { view: 'photo', photo }
-
-    if (photo) focusOn(photo.lat, photo.lng)
-  }
-
   function syncRouteGroups(routeGroups: IAPIRouteGroup[]) {
     const s = state.value
 
@@ -128,16 +119,6 @@ export function useSidebar() {
     }
   }
 
-  function syncPhotos(photos: IAPIPhoto[]) {
-    const s = state.value
-
-    if (s.view === 'photo' && s.photo) {
-      const fresh = photos.find((photo) => photo.id === s.photo!.id)
-
-      if (fresh) state.value = { ...s, photo: fresh }
-    }
-  }
-
   return {
     show: readonly(show),
     view,
@@ -145,7 +126,6 @@ export function useSidebar() {
     editingRoute,
     editingWaypoint,
     editingSpot,
-    editingPhoto,
     selectedRoute,
     open,
     close,
@@ -155,10 +135,8 @@ export function useSidebar() {
     openWaypoints,
     openWaypoint,
     openSpot,
-    openPhoto,
     syncRouteGroups,
     syncRoutes,
     syncSpots,
-    syncPhotos,
   }
 }

@@ -1,6 +1,6 @@
 const API_CACHE_NAME = 'api-cache'
 
-const API_CACHE_URLS = ['/api/routeGroups', '/api/routes', '/api/spots', '/api/photos']
+const API_CACHE_URLS = ['/api/routeGroups', '/api/routes', '/api/spots']
 
 export async function invalidateApiCache(): Promise<void> {
   if (!('caches' in window)) return

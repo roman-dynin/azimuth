@@ -12,18 +12,16 @@ function fetchOrEmpty<T>(url: string): Promise<T[]> {
 }
 
 const { data, refresh } = useAsyncData('data', async () => {
-  const [routeGroups, routes, spots, photos] = await Promise.all([
+  const [routeGroups, routes, spots] = await Promise.all([
     fetchOrEmpty<IAPIRouteGroup>('/api/routeGroups'),
     fetchOrEmpty<IAPIRoute>('/api/routes'),
     fetchOrEmpty<IAPISpot>('/api/spots'),
-    fetchOrEmpty<IAPIPhoto>('/api/photos'),
   ])
 
   return {
     routeGroups,
     routes,
     spots,
-    photos,
   }
 })
 
@@ -46,8 +44,6 @@ const { authorized, init: initAuth } = useAuth()
 const { online } = useOnline()
 
 const { isDark, toggle: toggleColorScheme } = useColorScheme()
-
-const visiblePhotos = computed(() => (online.value ? (data.value?.photos ?? []) : []))
 
 const showAuthModal = ref(false)
 
@@ -88,8 +84,6 @@ function render() {
 
   renderSpots(contentLayer.value, data.value.spots)
 
-  renderPhotos(contentLayer.value, visiblePhotos.value)
-
   if (depthLayer.value) {
     const allWaypoints = data.value.routes.flatMap((route) => route.waypoints)
 
@@ -98,8 +92,6 @@ function render() {
 }
 
 watch(data, render)
-
-watch(online, render)
 
 const apiUpdatesChannel = shallowRef<BroadcastChannel>()
 
@@ -242,12 +234,10 @@ useHead({
         :route-groups="data.routeGroups"
         :routes="data.routes"
         :spots="data.spots"
-        :photos="visiblePhotos"
         :map-click-lat-lng="mapClickLatLng"
         @refresh="refresh"
         @toggle-picking="picking = $event"
       />
-      <ThePhotoViewer />
     </div>
     <div class="flex items-center justify-between bg-gray-50 px-2 py-2 text-xs text-gray-500 dark:bg-black">
       <div class="hidden lg:block">

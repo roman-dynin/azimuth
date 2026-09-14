@@ -70,7 +70,7 @@ export default defineNuxtConfig({
       globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
       additionalManifestEntries: [{ url: '/', revision: `${Date.now()}` }],
       navigateFallback: '/',
-      navigateFallbackDenylist: [/^\/api\//, /^\/uploads\//],
+      navigateFallbackDenylist: [/^\/api\//],
       clientsClaim: true,
       skipWaiting: true,
       cleanupOutdatedCaches: true,
@@ -85,7 +85,7 @@ export default defineNuxtConfig({
           },
         },
         {
-          urlPattern: /\/api\/(routes|routeGroups|spots|photos)(\?.*)?$/,
+          urlPattern: /\/api\/(routes|routeGroups|spots)(\?.*)?$/,
           handler: 'StaleWhileRevalidate',
           options: {
             cacheName: 'api-cache',
@@ -95,15 +95,6 @@ export default defineNuxtConfig({
               channelName: 'api-cache-updates',
               options: { headersToCheck: ['content-length', 'etag', 'last-modified'] },
             },
-          },
-        },
-        {
-          urlPattern: /\/uploads\/photos\//,
-          handler: 'CacheFirst',
-          options: {
-            cacheName: 'photos-cache',
-            expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            cacheableResponse: { statuses: [0, 200] },
           },
         },
         {

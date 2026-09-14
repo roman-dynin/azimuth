@@ -1,6 +1,6 @@
 import type { FeatureGroup } from 'leaflet'
 
-import type { Photo, RouteGroup, Spot } from '~~/prisma/generated/client'
+import type { RouteGroup, Spot } from '~~/prisma/generated/client'
 
 export type IAPIRouteGroup = RouteGroup
 
@@ -41,5 +41,3 @@ export interface IAPIWaypoint {
 }
 
 export type IAPISpot = Spot
-
-export type IAPIPhoto = Photo

@@ -1,4 +1,4 @@
-import type { FeatureGroup, LatLngTuple, LayerGroup, Map as LeafletMap } from 'leaflet'
+import type { FeatureGroup, LatLngTuple, LayerGroup } from 'leaflet'
 
 import L from 'leaflet'
 
@@ -146,28 +146,4 @@ export function renderDepthHalos(depthLayer: FeatureGroup, waypoints: IAPIWaypoi
     .sort((a, b) => b.depth - a.depth)
     .reverse()
     .forEach((halo) => drawHalo(halo.lat, halo.lng, halo.depth))
-}
-
-export function renderPhotos(contentLayer: LayerGroup, photos: IAPIPhoto[]): void {
-  const { open } = useLightbox()
-
-  photos.forEach((photo) => {
-    const marker = new L.Marker([photo.lat, photo.lng], {
-      pane: 'markers',
-      icon: new L.DivIcon({
-        className: 'marker--emoji',
-        html: '📷',
-      }),
-    })
-
-    const tooltip = getPhotoTooltip(photo)
-
-    if (tooltip) {
-      marker.bindTooltip(tooltip)
-    }
-
-    marker.on('click', () => open(`/uploads/photos/${photo.filename}`))
-
-    marker.addTo(contentLayer)
-  })
 }

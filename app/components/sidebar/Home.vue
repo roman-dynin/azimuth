@@ -3,7 +3,6 @@ defineProps<{
   routeGroups: IAPIRouteGroup[]
   routes: IAPIRoute[]
   spots: IAPISpot[]
-  photos: IAPIPhoto[]
 }>()
 
 const emit = defineEmits<{
@@ -11,7 +10,6 @@ const emit = defineEmits<{
   openRoute: [route: IAPIRoute | null]
   openWaypoints: [route: IAPIRoute]
   openSpot: [spot: IAPISpot | null]
-  openPhoto: [photo: IAPIPhoto | null]
 }>()
 </script>
 
@@ -37,13 +35,6 @@ const emit = defineEmits<{
     <SidebarSpotsList
       :spots="spots"
       @open="emit('openSpot', $event)"
-    />
-
-    <div class="border-t border-gray-200 dark:border-gray-800" />
-
-    <SidebarPhotosList
-      :photos="photos"
-      @open="emit('openPhoto', $event)"
     />
   </div>
 </template>
