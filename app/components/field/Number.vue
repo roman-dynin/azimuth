@@ -5,6 +5,7 @@ const props = defineProps<{
   max?: number
   step?: number
   placeholder?: string
+  disabled?: boolean
 }>()
 
 const model = defineModel<number | null>({ default: null })
@@ -45,7 +46,8 @@ function onBlur() {
       :max="max"
       :step="step"
       :placeholder="placeholder"
-      class="w-full rounded border border-gray-200 bg-gray-100 px-2 py-1.5 text-sm focus:border-gray-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800"
+      :disabled="disabled"
+      class="w-full disabled:opacity-50 rounded border border-gray-200 bg-gray-100 px-2 py-1.5 text-sm focus:border-gray-500 focus:outline-none dark:border-gray-700 dark:bg-gray-800"
       @input="onInput"
       @blur="onBlur"
     />

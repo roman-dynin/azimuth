@@ -1,6 +1,12 @@
 import type { Waypoint } from '~~/prisma/generated/client'
 
-export default defineEventHandler(async () => {
+import { z } from 'zod'
+
+const querySchema = z.object({ speed: z.coerce.number().positive().max(10).optional() })
+
+export default defineEventHandler(async (event) => {
+  const { speed } = await getValidatedQuery(event, querySchema.parse)
+
   const [rawRoutes, rawWaypoints] = await Promise.all([
     prisma.route.findMany({ orderBy: { id: 'asc' } }),
     prisma.waypoint.findMany({ orderBy: [{ order: { sort: 'asc', nulls: 'last' } }, { id: 'asc' }] }),
@@ -16,5 +22,5 @@ export default defineEventHandler(async () => {
     waypointsByRouteId.set(waypoint.routeId, list)
   }
 
-  return buildRoutes(rawRoutes, waypointsByRouteId)
+  return buildRoutes(rawRoutes, waypointsByRouteId, speed)
 })

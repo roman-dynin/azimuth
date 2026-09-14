@@ -1,6 +1,10 @@
 import type { Route, Waypoint } from '~~/prisma/generated/client'
 
-export function buildRoutes(rawRoutes: Route[], waypointsByRouteId: Map<number, Waypoint[]>): IAPIRoute[] {
+export function buildRoutes(
+  rawRoutes: Route[],
+  waypointsByRouteId: Map<number, Waypoint[]>,
+  speed = DIVER_SPEED_MULTIPLIER,
+): IAPIRoute[] {
   const routes: IAPIRoute[] = []
 
   const handled = new Set<number>()
@@ -13,7 +17,7 @@ export function buildRoutes(rawRoutes: Route[], waypointsByRouteId: Map<number, 
     for (const route of rawRoutes) {
       if (handled.has(route.id)) continue
 
-      const built = buildRoute(route, waypointsByRouteId.get(route.id) ?? [], waypointsLatLng)
+      const built = buildRoute(route, waypointsByRouteId.get(route.id) ?? [], waypointsLatLng, speed)
 
       if (!built) continue
 
@@ -41,6 +45,7 @@ function buildRoute(
   route: Route,
   rawWaypoints: Waypoint[],
   waypointsLatLng: Record<number, [number, number]>,
+  speed: number,
 ): IAPIRoute | null {
   let previousLat: number
 
@@ -82,16 +87,16 @@ function buildRoute(
 
       ;({ azimuth, distance } = inverseOffset(previousLat, previousLng, targetLat, targetLng))
 
-      seconds = distance / DIVER_SPEED_MULTIPLIER
+      seconds = distance / speed
 
       previousLat = targetLat
 
       previousLng = targetLng
     } else {
       // distance приоритетнее seconds: если задано distance, seconds пересчитывается из него
-      distance = distance ?? seconds! * DIVER_SPEED_MULTIPLIER
+      distance = distance ?? seconds! * speed
 
-      seconds = distance / DIVER_SPEED_MULTIPLIER
+      seconds = distance / speed
 
       ;[previousLat, previousLng] = forwardOffset(previousLat, previousLng, waypoint.azimuth!, distance)
     }

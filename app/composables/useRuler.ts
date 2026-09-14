@@ -21,7 +21,7 @@ function formatMeters(distance: number): string {
 }
 
 function formatTime(distance: number): string {
-  const seconds = distance / DIVER_SPEED_MULTIPLIER
+  const seconds = distance / useSettings().speed.value
 
   return seconds < 60 ? `${Math.round(seconds)} с` : `${Math.round(seconds / 60)} мин`
 }

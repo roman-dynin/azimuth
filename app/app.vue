@@ -11,10 +11,12 @@ function fetchOrEmpty<T>(url: string): Promise<T[]> {
   })
 }
 
+const { speed } = useSettings()
+
 const { data, refresh } = useAsyncData('data', async () => {
   const [routeGroups, routes, spots] = await Promise.all([
     fetchOrEmpty<IAPIRouteGroup>('/api/routeGroups'),
-    fetchOrEmpty<IAPIRoute>('/api/routes'),
+    fetchOrEmpty<IAPIRoute>(`/api/routes?speed=${speed.value}`),
     fetchOrEmpty<IAPISpot>('/api/spots'),
   ])
 
@@ -46,6 +48,8 @@ const { online } = useOnline()
 const { isDark, toggle: toggleColorScheme } = useColorScheme()
 
 const showAuthModal = ref(false)
+
+const showSettingsModal = ref(false)
 
 function handleManagementClick() {
   if (authorized.value) {
@@ -93,6 +97,8 @@ function render() {
 
 watch(data, render)
 
+watch(speed, () => refresh())
+
 const apiUpdatesChannel = shallowRef<BroadcastChannel>()
 
 onMounted(() => {
@@ -123,6 +129,17 @@ onMounted(() => {
   if (depthLayerVisible.value) {
     depthLayer.value.addTo(map.value)
   }
+
+  // В bottom-углах Leaflet вставляет контролы сверху: первый добавленный оказывается в самом низу
+  createButtonControl({
+    icon: () => (isDark.value ? '☀️' : '🌙'),
+    title: () => (isDark.value ? 'Светлая тема' : 'Тёмная тема'),
+    onClick: toggleColorScheme,
+  }).addTo(map.value)
+
+  createButtonControl({ icon: '⚙️', title: 'Настройки', onClick: () => (showSettingsModal.value = true) }).addTo(
+    map.value,
+  )
 
   createDepthToggleControl({
     initialVisible: depthLayerVisible.value,
@@ -155,7 +172,7 @@ onMounted(() => {
 
   initRuler(map.value)
 
-  createRulerControl({ active: rulerActive, onToggle: toggleRuler }).addTo(map.value)
+  createButtonControl({ icon: '📏', title: 'Линейка', active: rulerActive, onClick: toggleRuler }).addTo(map.value)
 
   const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxNativeZoom: 19,
@@ -229,6 +246,10 @@ useHead({
         @success="onAuthSuccess"
         @close="showAuthModal = false"
       />
+      <TheSettingsModal
+        v-if="showSettingsModal"
+        @close="showSettingsModal = false"
+      />
       <TheSidebar
         v-if="showSidebar && data"
         :route-groups="data.routeGroups"
@@ -258,13 +279,6 @@ useHead({
         >
       </div>
       <div class="flex items-center gap-3">
-        <button
-          class="cursor-pointer text-base leading-none"
-          :title="isDark ? 'Светлая тема' : 'Тёмная тема'"
-          @click="toggleColorScheme"
-        >
-          {{ isDark ? '☀️' : '🌙' }}
-        </button>
         <button
           class="hidden cursor-pointer text-gray-600 hover:text-black lg:inline dark:text-gray-400 dark:hover:text-white"
           @click="handleManagementClick"
@@ -343,6 +357,7 @@ useHead({
   flex-direction: row;
   align-items: center;
   gap: 6px;
+  position: relative;
   background: none;
   border: none;
   box-shadow: none;
@@ -372,11 +387,13 @@ useHead({
 
 .depth-toggle__legend {
   display: none;
+  position: absolute;
+  left: calc(100% + 6px);
+  bottom: 0;
   padding: 5px 8px;
   width: 140px;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 4px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
   font-size: 10px;
   color: #374151;
   backdrop-filter: blur(4px);
@@ -413,15 +430,14 @@ useHead({
 [data-theme='dark'] .depth-toggle__legend {
   background: rgba(31, 41, 55, 0.92);
   color: #f3f4f6;
-  border-color: #374151;
 }
 
-.ruler-toggle {
+.map-button {
   border: none;
   box-shadow: none;
 }
 
-.ruler-toggle__button {
+.map-button__button {
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -434,11 +450,11 @@ useHead({
   border-radius: 4px;
 }
 
-.ruler-toggle--active .ruler-toggle__button {
+.map-button--active .map-button__button {
   box-shadow: 0 0 0 2px #1f9e89;
 }
 
-[data-theme='dark'] .ruler-toggle__button {
+[data-theme='dark'] .map-button__button {
   background: #1f2937;
 }
 

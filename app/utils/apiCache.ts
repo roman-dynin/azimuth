@@ -7,5 +7,5 @@ export async function invalidateApiCache(): Promise<void> {
 
   const cache = await caches.open(API_CACHE_NAME)
 
-  await Promise.all(API_CACHE_URLS.map((url) => cache.delete(url)))
+  await Promise.all(API_CACHE_URLS.map((url) => cache.delete(url, { ignoreSearch: true })))
 }
