@@ -170,10 +170,10 @@ onMounted(() => {
     maxZoom: 22,
   })
 
-  const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxNativeZoom: 20,
+  const darkLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxNativeZoom: 19,
     maxZoom: 22,
-    subdomains: 'abcd',
+    className: 'tile--dark',
   })
 
   const googleSatelliteLayer = L.tileLayer('https://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
@@ -292,6 +292,10 @@ useHead({
 @import 'leaflet/dist/leaflet.css';
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+.tile--dark {
+  filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9);
+}
 
 .marker--emoji {
   font-size: calc(var(--emoji-marker-size) * 0.5);
