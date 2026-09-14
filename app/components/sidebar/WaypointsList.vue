@@ -17,6 +17,37 @@ watch(
   (waypoints) => (waypointsCopy.value = [...waypoints]),
 )
 
+const form = reactive({
+  targetWaypointId: null as number | null,
+  azimuth: null as number | null,
+  distance: null as number | null,
+  seconds: null as number | null,
+})
+
+const { saving, error, save } = useEntityForm(
+  '/api/waypoints',
+  null,
+  () => ({
+    routeId: props.route.id,
+    // max + 1: после удалений count меньше последнего order
+    order: Math.max(0, ...waypointsCopy.value.map((waypoint) => waypoint.order ?? 0)) + 1,
+    ...(form.targetWaypointId
+      ? { targetWaypointId: form.targetWaypointId }
+      : { azimuth: form.azimuth, distance: form.distance, seconds: form.seconds }),
+  }),
+  () => {
+    form.targetWaypointId = null
+
+    form.azimuth = null
+
+    form.distance = null
+
+    form.seconds = null
+
+    emit('refresh')
+  },
+)
+
 const dragIndex = ref(-1)
 
 const dragOverIndex = ref(-1)
@@ -58,49 +89,27 @@ async function onDrop(targetIndex: number, event: DragEvent) {
 
   waypointsCopy.value = waypoints
 
-  await $fetch('/api/waypoints/reorder', {
-    method: 'PATCH',
-    headers: getAuthHeaders(),
-    body: waypoints.map((waypoint, index) => ({
-      id: waypoint.id,
-      order: index + 1,
-    })),
-  })
+  error.value = ''
 
-  await invalidateApiCache()
+  try {
+    await $fetch('/api/waypoints/reorder', {
+      method: 'PATCH',
+      headers: getAuthHeaders(),
+      body: waypoints.map((waypoint, index) => ({
+        id: waypoint.id,
+        order: index + 1,
+      })),
+    })
 
-  emit('refresh')
-}
-
-const form = reactive({
-  targetWaypointId: null as number | null,
-  azimuth: null as number | null,
-  distance: null as number | null,
-  seconds: null as number | null,
-})
-
-const { saving, error, save } = useEntityForm(
-  '/api/waypoints',
-  null,
-  () => ({
-    routeId: props.route.id,
-    order: waypointsCopy.value.length + 1,
-    ...(form.targetWaypointId
-      ? { targetWaypointId: form.targetWaypointId }
-      : { azimuth: form.azimuth, distance: form.distance, seconds: form.seconds }),
-  }),
-  () => {
-    form.targetWaypointId = null
-
-    form.azimuth = null
-
-    form.distance = null
-
-    form.seconds = null
+    await invalidateApiCache()
 
     emit('refresh')
-  },
-)
+  } catch (err: any) {
+    waypointsCopy.value = [...props.route.waypoints]
+
+    error.value = err?.data?.message || err?.message || 'Не удалось изменить порядок'
+  }
+}
 </script>
 
 <template>
@@ -125,7 +134,9 @@ const { saving, error, save } = useEntityForm(
         @dragleave="onDragLeave"
         @drop="onDrop(index, $event)"
       >
-        <span class="shrink-0 cursor-grab text-lg leading-none text-gray-400 active:cursor-grabbing dark:text-gray-600">⠿</span>
+        <span class="shrink-0 cursor-grab text-lg leading-none text-gray-400 active:cursor-grabbing dark:text-gray-600"
+          >⠿</span
+        >
         <div class="min-w-0 flex-1">
           <div class="text-xs text-gray-500">ID: {{ waypoint.id }}</div>
           <div class="truncate text-sm text-gray-800 dark:text-gray-200">

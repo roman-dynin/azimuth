@@ -16,7 +16,7 @@ const emit = defineEmits<{
 
 const { back } = useSidebar()
 
-const loading = ref(false)
+const loadError = ref('')
 
 const form = reactive({
   title: null as string | null,
@@ -37,13 +37,13 @@ function setAnchorLatLng(lat: number, lng: number): void {
 }
 
 if (props.route) {
-  loading.value = true
+  try {
+    const { id: _id, ...editable } = await $fetch<Route>(`/api/routes/${props.route.id}`)
 
-  const { id: _id, ...editable } = await $fetch<Route>(`/api/routes/${props.route.id}`)
-
-  Object.assign(form, editable)
-
-  loading.value = false
+    Object.assign(form, editable)
+  } catch (err: any) {
+    loadError.value = err?.data?.message || err?.message || 'Не удалось загрузить маршрут'
+  }
 }
 
 const { show, hide, onDrag } = useCoordinatesPreview()
@@ -92,10 +92,10 @@ function onSave() {
   <SidebarHeader :title="route ? `Маршрут #${route.id}` : 'Новый маршрут'" />
 
   <div
-    v-if="loading"
-    class="flex flex-1 items-center justify-center"
+    v-if="loadError"
+    class="flex-1 px-4 py-4 text-sm text-red-700 dark:text-red-400"
   >
-    <span class="text-sm text-gray-500">Загружаю ...</span>
+    {{ loadError }}
   </div>
 
   <template v-else>

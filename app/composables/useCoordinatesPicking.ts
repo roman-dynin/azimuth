@@ -13,6 +13,11 @@ export function useCoordinatesPicking(
     onPickingChange(picking.value)
   }
 
+  // Форма может размонтироваться посреди выбора
+  onUnmounted(() => {
+    if (picking.value) onPickingChange(false)
+  })
+
   watch(getLatLng, (latlng) => {
     if (!latlng || !picking.value) return
 

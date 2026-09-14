@@ -1,11 +1,3 @@
-export function getRandomColorValue(): number {
-  return Math.floor(Math.random() * 254)
-}
-
-export function getRandomRGBA(): string {
-  return `rgba(${getRandomColorValue()}, ${getRandomColorValue()}, ${getRandomColorValue()}, 0.75)`
-}
-
 export function getRouteColor(routeGroup: IAPIRouteGroup | undefined, route: IAPIRoute): string {
   if (routeGroup?.color) {
     return routeGroup.color
@@ -15,5 +7,6 @@ export function getRouteColor(routeGroup: IAPIRouteGroup | undefined, route: IAP
     return route.color
   }
 
-  return getRandomRGBA()
+  // Золотой угол: соседние id получают далёкие оттенки
+  return `hsl(${(route.id * 137.508) % 360}, 70%, 45%)`
 }

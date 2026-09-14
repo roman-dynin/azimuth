@@ -5,11 +5,10 @@ const emit = defineEmits<{ close: [] }>()
 
 const { speed } = useSettings()
 
-// В UI — м/мин (так дайверу привычнее), внутри и в API — м/с
+// В UI м/мин, дайверу привычнее; внутри м/с
 const form = ref<number | null>(Math.round(speed.value * 60 * 10) / 10)
 
 function submit() {
-  // Пустое поле = вернуться к скорости по умолчанию
   speed.value = form.value ? form.value / 60 : DIVER_SPEED_MULTIPLIER
 
   emit('close')
@@ -40,6 +39,7 @@ function submit() {
         v-model="form"
         label="Скорость, м/мин"
         :min="1"
+        :max="600"
         :step="1"
         :placeholder="String(DIVER_SPEED_MULTIPLIER * 60)"
       />

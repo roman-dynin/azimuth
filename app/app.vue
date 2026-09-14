@@ -142,7 +142,7 @@ onMounted(() => {
     depthLayer.value.addTo(map.value)
   }
 
-  // В bottom-углах Leaflet вставляет контролы сверху: первый добавленный оказывается в самом низу
+  // В нижних углах Leaflet ставит новый контрол выше предыдущих
   createButtonControl({
     icon: () => (isDark.value ? Sun : Moon),
     title: () => (isDark.value ? 'Светлая тема' : 'Тёмная тема'),
@@ -198,8 +198,7 @@ onMounted(() => {
 
   ;(isDark.value ? darkLayer : osmLayer).addTo(map.value)
 
-  // ponytail: подписи маршрутов — bindTooltip на полилиниях, отдельным слоем их не вынести.
-  // Пустой слой-переключатель: чекбокс в контроле слоёв прячет их через класс на контейнере карты.
+  // Подписи привязаны к полилиниям, в слой не вынести; пустой слой ради чекбокса
   const container = map.value.getContainer()
 
   const labelsLayer = L.layerGroup()
@@ -448,9 +447,7 @@ useHead({
   box-shadow: none;
 }
 
-/* Цель клика — всегда <a>, а не svg внутри. Иначе Vue перерисовывает иконку между
-   слушателями клика, svg отрывается от DOM, и Leaflet не видит disableClickPropagation
-   по цепочке parentNode — клик по кнопке долетает до карты. */
+/* Иконка пересоздаётся между слушателями click, и Leaflet не находит контрол по parentNode */
 .map-button__button svg,
 .depth-toggle__button svg {
   pointer-events: none;
@@ -481,6 +478,11 @@ useHead({
   display: none;
 }
 
+/* CSS-stroke перебивает атрибут stroke от Leaflet */
+.route--hover {
+  stroke: rgba(0, 255, 0, 0.75);
+}
+
 .map-toolbar {
   display: flex;
   flex-direction: column;
@@ -509,7 +511,7 @@ useHead({
   color: #dc2626;
 }
 
-/* Прицел — тонкий крест без кольца, чтобы не путать с узлом линии */
+/* Крест без кольца: кольцо похоже на узел линии */
 .ruler-crosshair {
   position: absolute;
   left: 50%;
@@ -549,15 +551,14 @@ useHead({
   animation: pulse 1.5s ease-in-out infinite;
 }
 
+/* Только opacity: анимация transform перебила бы translate3d Leaflet'а */
 @keyframes pulse {
   0%,
   100% {
     opacity: 1;
-    transform: scale(1);
   }
   50% {
-    opacity: 0.6;
-    transform: scale(1.15);
+    opacity: 0.5;
   }
 }
 </style>

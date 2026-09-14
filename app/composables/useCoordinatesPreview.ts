@@ -44,10 +44,7 @@ export function useCoordinatesPreview() {
       }
 
       marker = new L.Marker(value!, {
-        icon: new L.DivIcon({
-          className: 'marker--emoji marker--preview',
-          html: '📍',
-        }),
+        icon: getEmojiIcon('📍', 'marker--preview'),
         draggable: true,
         zIndexOffset: 1000,
       }).addTo(map)

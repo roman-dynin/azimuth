@@ -10,12 +10,10 @@ const STORAGE_KEY = 'azimuth-ruler'
 
 const COLOR = '#1f9e89'
 
-// Режим редактирования: перекрестие, тулбар, клики по узлам/подписям
 const active = ref(false)
 
 let lines: Line[] = readStored()
 
-// Последняя линия открыта для добавления точек
 let drawing = false
 
 let map: LeafletMap | undefined
@@ -28,15 +26,20 @@ let toolbar: L.Control | undefined
 
 let crosshair: HTMLElement | undefined
 
-// На десктопе точки ставятся кликом, «резинка» идёт за мышью.
-// На тач-устройствах клик по карте игнорируется (иначе пан ставит точки) — только кнопка ➕ по перекрестию.
+// На таче пан завершается click'ом
 let finePointer = false
 
 function readStored(): Line[] {
   try {
     const raw: unknown = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? '[]')
 
-    return Array.isArray(raw) ? raw.filter((line) => Array.isArray(line) && line.length >= 2) : []
+    const isPoint = (point: unknown): point is LatLngLiteral =>
+      typeof (point as LatLngLiteral)?.lat === 'number' && typeof (point as LatLngLiteral)?.lng === 'number'
+
+    // L.polyline кидает на объекте без lat / lng
+    return Array.isArray(raw)
+      ? raw.filter((line) => Array.isArray(line) && line.length >= 2 && line.every(isPoint))
+      : []
   } catch {
     return []
   }
@@ -46,7 +49,7 @@ function save(): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(lines.filter((line) => line.length >= 2)))
   } catch {
-    // localStorage unavailable (Safari private mode etc.)
+    // Safari private mode кидает на setItem
   }
 }
 
@@ -121,7 +124,7 @@ function removePoint(line: Line, index: number): void {
 
   const isCurrent = line === current()
 
-  // Завершённая линия из одной точки бессмысленна — сносим целиком
+  // Завершённой линии нужно две точки, текущей — хотя бы одна
   if (line.length < (isCurrent ? 1 : 2)) {
     removeLine(line)
 
@@ -148,7 +151,7 @@ function undo(): void {
 }
 
 function clearAll(): void {
-  // Нативный confirm: сносит всё разом, а «отменить» тут нет
+  // Нативный confirm: undo для этого нет
   // eslint-disable-next-line no-alert
   if (lines.length === 0 || !confirm('Удалить все линии?')) {
     return
@@ -170,8 +173,7 @@ function nodeIcon(editing: boolean): L.DivIcon {
 function labelContent(line: Line, index: number, deletable: boolean): string {
   let content = segmentLabel(line[index - 1]!, line[index]!)
 
-  // Итог по линии — на последнем сегменте, и только когда сегментов больше одного,
-  // иначе он дословно повторяет подпись самого сегмента.
+  // При одном сегменте итог повторяет его подпись
   if (index === line.length - 1 && line.length > 2) {
     content += ` · ${totalLabel(lineDistance(line))}`
   }
@@ -188,7 +190,7 @@ function drawLine(line: Line, group: L.LayerGroup, editing: boolean): void {
 
   const polyline = L.polyline(line, { color: COLOR, weight: 3, dashArray: '8 8', interactive: false }).addTo(group)
 
-  // labels[i] — подпись сегмента (i-1 → i); labels[0] не используется
+  // Индекс — конец сегмента
   const labels: L.Tooltip[] = []
 
   line.forEach((point, index) => {
@@ -208,7 +210,7 @@ function drawLine(line: Line, group: L.LayerGroup, editing: boolean): void {
 
     labels[index] = tooltip
 
-    // Нативный listener на DOM подписи: stop() не даёт клику долететь до карты и поставить точку
+    // Нативный listener: tooltip.on не остановит click до карты
     if (deletable) {
       L.DomEvent.on(tooltip.getElement()!, 'click', (event) => {
         L.DomEvent.stop(event)
@@ -220,7 +222,7 @@ function drawLine(line: Line, group: L.LayerGroup, editing: boolean): void {
     }
   })
 
-  // Живое обновление при перетаскивании узла: линия и подписи, без пересоздания маркеров
+  // Не redraw: пересоздание маркера обрывает drag
   const refresh = () => {
     polyline.setLatLngs(line)
 
@@ -319,8 +321,7 @@ function onMove(): void {
 }
 
 function onDoubleClick(): void {
-  // Двойной клик Leaflet'а обычно идёт после пары click в той же точке — убираем дубль,
-  // но только если он действительно есть (на части устройств лишнего click может не быть).
+  // dblclick приходит после двух click в той же точке, но не на всех устройствах
   const line = current()
 
   const last = line?.at(-1)
@@ -397,7 +398,12 @@ function deactivate(): void {
 
   document.removeEventListener('keydown', onKeyDown)
 
-  finishLine()
+  // finishLine без открытой линии не перерисовывает
+  if (drawing) {
+    finishLine()
+  } else {
+    redraw()
+  }
 }
 
 export function useRuler() {
@@ -419,6 +425,9 @@ export function useRuler() {
         { icon: Trash2, title: 'Удалить все линии', onClick: clearAll },
       ],
     })
+
+    // Подписи считают время от скорости
+    watch(useSettings().speed, redraw)
 
     redraw()
   }

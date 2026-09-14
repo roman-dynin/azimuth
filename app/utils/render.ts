@@ -48,7 +48,7 @@ export function renderRoutes(
   })
 }
 
-// POI-точки уходят в отдельный слой, чтобы их можно было скрывать независимо от маршрутов
+// POI в отдельном слое: их скрывают независимо от маршрутов
 export function renderRouteWaypoints(
   contentLayer: LayerGroup,
   poiLayer: LayerGroup,
@@ -72,22 +72,15 @@ export function renderRouteWaypoints(
     marker.addTo(target)
 
     if (waypoint.emoji) {
-      const [emojiLat, emojiLng] = forwardOffset(
+      // Смещение визуальное, не компасное
+      const [emojiLat, emojiLng] = forwardOffsetTrue(
         waypoint.lat,
         waypoint.lng,
         WAYPOINT_EMOJI_ANGLE_DEG,
         WAYPOINT_EMOJI_OFFSET_METERS,
       )
 
-      const emojiMarker = new L.Marker([emojiLat, emojiLng], {
-        pane: 'markers',
-        icon: new L.DivIcon({
-          className: 'marker--emoji',
-          html: waypoint.emoji,
-          iconSize: [WAYPOINT_EMOJI_SIZE_PX, WAYPOINT_EMOJI_SIZE_PX],
-          iconAnchor: [WAYPOINT_EMOJI_SIZE_PX / 2, WAYPOINT_EMOJI_SIZE_PX / 2],
-        }),
-      })
+      const emojiMarker = new L.Marker([emojiLat, emojiLng], { pane: 'markers', icon: getEmojiIcon(waypoint.emoji) })
 
       if (tooltip) {
         emojiMarker.bindTooltip(tooltip)
@@ -100,13 +93,7 @@ export function renderRouteWaypoints(
 
 export function renderSpots(contentLayer: LayerGroup, spots: IAPISpot[]): void {
   spots.forEach((spot) => {
-    const marker = new L.Marker([spot.lat, spot.lng], {
-      pane: 'markers',
-      icon: new L.DivIcon({
-        className: 'marker--emoji',
-        html: spot.emoji,
-      }),
-    })
+    const marker = new L.Marker([spot.lat, spot.lng], { pane: 'markers', icon: getEmojiIcon(spot.emoji) })
 
     const tooltip = getSpotTooltip(spot)
 

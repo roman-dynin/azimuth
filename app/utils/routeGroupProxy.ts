@@ -6,13 +6,13 @@ export function getRouteGroupProxies(routeGroups: IAPIRouteGroup[]): Record<numb
   routeGroups.forEach((routeGroup) => {
     const featureGroup = new L.FeatureGroup()
 
-    featureGroup.on('mouseover', (event) => {
-      event.target.setStyle({ color: 'rgba(0, 255, 0, 0.75)' })
-    })
+    // Класс, а не setStyle: сброс не должен знать исходный цвет
+    const setHover = (on: boolean) =>
+      featureGroup.eachLayer((layer) => (layer as L.Path).getElement()?.classList.toggle('route--hover', on))
 
-    featureGroup.on('mouseout', (event) => {
-      event.target.setStyle({ color: routeGroup.color || getRandomRGBA() })
-    })
+    featureGroup.on('mouseover', () => setHover(true))
+
+    featureGroup.on('mouseout', () => setHover(false))
 
     const tooltip = getRouteGroupTooltip(routeGroup)
 

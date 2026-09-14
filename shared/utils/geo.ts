@@ -1,12 +1,15 @@
-// Во всём приложении azimuth — магнитный (показание компаса). Пересчёт в истинный
-// и обратно живёт только здесь, чтобы buildRoutes и линейка не расходились.
-export function forwardOffset(
+// azimuth — магнитный, с компаса
+export function forwardOffset(prevLat: number, prevLng: number, azimuth: number, distance: number): [number, number] {
+  return forwardOffsetTrue(prevLat, prevLng, azimuth + MAGNETIC_DECLINATION_DEG, distance)
+}
+
+export function forwardOffsetTrue(
   prevLat: number,
   prevLng: number,
-  azimuth: number,
+  trueAzimuth: number,
   distance: number,
 ): [number, number] {
-  const radians = (azimuth + MAGNETIC_DECLINATION_DEG) * (Math.PI / 180)
+  const radians = trueAzimuth * (Math.PI / 180)
 
   const latOffset = (distance * Math.cos(radians)) / METERS_PER_DEGREE
 

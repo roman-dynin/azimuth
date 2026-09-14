@@ -11,7 +11,8 @@ const emit = defineEmits<{
 
 const { back } = useSidebar()
 
-const loading = ref(true)
+// Список отдаёт вычисленные azimuth / seconds / distance, форме нужны введённые
+const loadError = ref('')
 
 const form = reactive({
   title: null as string | null,
@@ -27,11 +28,13 @@ const form = reactive({
   order: null as number | null,
 })
 
-const { id: _id, routeId: _routeId, ...editable } = await $fetch<Waypoint>(`/api/waypoints/${props.waypoint.id}`)
+try {
+  const { id: _id, routeId: _routeId, ...editable } = await $fetch<Waypoint>(`/api/waypoints/${props.waypoint.id}`)
 
-Object.assign(form, editable)
-
-loading.value = false
+  Object.assign(form, editable)
+} catch (err: any) {
+  loadError.value = err?.data?.message || err?.message || 'Не удалось загрузить точку'
+}
 
 const { saving, removing, error, save, remove } = useEntityForm(
   '/api/waypoints',
@@ -52,10 +55,10 @@ const { saving, removing, error, save, remove } = useEntityForm(
   <SidebarHeader :title="`Точка #${waypoint.id}`" />
 
   <div
-    v-if="loading"
-    class="flex flex-1 items-center justify-center"
+    v-if="loadError"
+    class="flex-1 px-4 py-4 text-sm text-red-700 dark:text-red-400"
   >
-    <span class="text-sm text-gray-500">Загружаю ...</span>
+    {{ loadError }}
   </div>
 
   <template v-else>
