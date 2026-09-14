@@ -38,7 +38,9 @@ watch(() => props.spots, syncSpots)
 </script>
 
 <template>
-  <div class="absolute top-0 right-0 bottom-0 z-[1000] flex w-full flex-col bg-white text-gray-900 shadow-2xl sm:w-80 dark:bg-gray-900 dark:text-white">
+  <div
+    class="absolute top-0 right-0 bottom-0 z-[1000] flex w-full flex-col bg-white text-gray-900 shadow-2xl sm:w-80 dark:bg-gray-900 dark:text-white"
+  >
     <SidebarHome
       v-if="view === 'home'"
       :route-groups="routeGroups"

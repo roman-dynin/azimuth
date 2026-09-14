@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { X } from 'lucide'
 
-const emit = defineEmits<{ success: [], close: [] }>()
+const emit = defineEmits<{ success: []; close: [] }>()
 
 const { authorize } = useAuth()
 

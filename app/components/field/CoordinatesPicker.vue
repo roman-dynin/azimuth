@@ -20,7 +20,11 @@ const emit = defineEmits<{
         {{ label ?? 'Координаты' }}
       </div>
       <button
-        :class="picking ? 'animate-pulse text-blue-400' : 'text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white'"
+        :class="
+          picking
+            ? 'animate-pulse text-blue-400'
+            : 'text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white'
+        "
         class="cursor-pointer text-xs"
         @click="emit('togglePicking')"
       >

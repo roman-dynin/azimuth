@@ -40,7 +40,9 @@ const emit = defineEmits<{
           {{ group.title || '—' }}
         </div>
       </div>
-      <span class="text-xs text-gray-400 group-hover:text-gray-600 dark:text-gray-600 dark:group-hover:text-gray-400">→</span>
+      <span class="text-xs text-gray-400 group-hover:text-gray-600 dark:text-gray-600 dark:group-hover:text-gray-400"
+        >→</span
+      >
     </div>
   </div>
 </template>

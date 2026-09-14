@@ -38,7 +38,9 @@ const emit = defineEmits<{
           <div class="truncate text-sm">{{ spot.title || '—' }}</div>
         </div>
       </div>
-      <span class="text-xs text-gray-400 group-hover:text-gray-600 dark:text-gray-600 dark:group-hover:text-gray-400">→</span>
+      <span class="text-xs text-gray-400 group-hover:text-gray-600 dark:text-gray-600 dark:group-hover:text-gray-400"
+        >→</span
+      >
     </div>
   </div>
 </template>
