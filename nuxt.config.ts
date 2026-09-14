@@ -16,9 +16,7 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
         { name: 'apple-mobile-web-app-title', content: 'Керамзитное' },
       ],
-      script: [
-        { src: '/theme.js', tagPosition: 'head' },
-      ],
+      script: [{ src: '/theme.js', tagPosition: 'head' }],
     },
   },
 
@@ -76,25 +74,26 @@ export default defineNuxtConfig({
       cleanupOutdatedCaches: true,
       runtimeCaching: [
         {
-          urlPattern: ({ request }) => request.mode === 'navigate',
+          urlPattern: /\/api\/(routes|routeGroups|spots)(\?.*)?$/,
+          // StaleWhileRevalidate не заметит правку: Nitro отдаёт только content-length
           handler: 'NetworkFirst',
           options: {
-            cacheName: 'pages-cache',
-            expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            networkTimeoutSeconds: 3,
-          },
-        },
-        {
-          urlPattern: /\/api\/(routes|routeGroups|spots)(\?.*)?$/,
-          handler: 'StaleWhileRevalidate',
-          options: {
             cacheName: 'api-cache',
+            networkTimeoutSeconds: 3,
+            // Оффлайн со сменённой скоростью — другой URL
+            plugins: [
+              {
+                cacheKeyWillBeUsed: async ({ request }: { request: Request }) => {
+                  const url = new URL(request.url)
+
+                  url.search = ''
+
+                  return url.href
+                },
+              },
+            ],
             expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 * 30 },
             cacheableResponse: { statuses: [0, 200] },
-            broadcastUpdate: {
-              channelName: 'api-cache-updates',
-              options: { headersToCheck: ['content-length', 'etag', 'last-modified'] },
-            },
           },
         },
         {

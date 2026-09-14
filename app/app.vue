@@ -109,8 +109,6 @@ watch(data, render)
 
 watch(speed, () => refresh())
 
-const apiUpdatesChannel = shallowRef<BroadcastChannel>()
-
 onMounted(() => {
   map.value = L.map('map', { attributionControl: false }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM)
 
@@ -171,12 +169,6 @@ onMounted(() => {
       }
     },
   }).addTo(map.value)
-
-  if ('BroadcastChannel' in window) {
-    apiUpdatesChannel.value = new BroadcastChannel('api-cache-updates')
-
-    apiUpdatesChannel.value.addEventListener('message', () => refresh())
-  }
 
   initAuth()
 
@@ -244,10 +236,6 @@ onMounted(() => {
 
     layerControl = buildLayerControl(dark)
   })
-})
-
-onBeforeUnmount(() => {
-  apiUpdatesChannel.value?.close()
 })
 
 useHead({
