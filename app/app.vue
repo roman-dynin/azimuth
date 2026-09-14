@@ -3,6 +3,8 @@ import type { FeatureGroup, LatLngLiteral, LayerGroup, Map as LeafletMap } from 
 
 import L from 'leaflet'
 
+import { Moon, Ruler, Settings, Sun } from 'lucide'
+
 function fetchOrEmpty<T>(url: string): Promise<T[]> {
   return $fetch<T[]>(url).catch((err) => {
     console.warn(`[fetch] ${url}`, err)
@@ -34,6 +36,10 @@ const map = shallowRef<LeafletMap>()
 const mapClickLatLng = shallowRef<LatLngLiteral>()
 
 const contentLayer = shallowRef<LayerGroup>()
+
+const poiLayer = shallowRef<LayerGroup>()
+
+const spotsLayer = shallowRef<LayerGroup>()
 
 const depthLayer = shallowRef<FeatureGroup>()
 
@@ -74,19 +80,23 @@ const { init: initMapFocus } = useMapFocus()
 const { init: initRuler, active: rulerActive, toggle: toggleRuler } = useRuler()
 
 function render() {
-  if (!data.value || !map.value || !contentLayer.value) {
+  if (!data.value || !map.value || !contentLayer.value || !poiLayer.value || !spotsLayer.value) {
     return
   }
 
   contentLayer.value.clearLayers()
 
+  poiLayer.value.clearLayers()
+
+  spotsLayer.value.clearLayers()
+
   routeGroupProxies.value = getRouteGroupProxies(data.value.routeGroups)
 
-  renderRoutes(contentLayer.value, routeGroupProxies.value, data.value.routes)
+  renderRoutes(contentLayer.value, poiLayer.value, routeGroupProxies.value, data.value.routes)
 
   renderRouteGroups(contentLayer.value, routeGroupProxies.value)
 
-  renderSpots(contentLayer.value, data.value.spots)
+  renderSpots(spotsLayer.value, data.value.spots)
 
   if (depthLayer.value) {
     const allWaypoints = data.value.routes.flatMap((route) => route.waypoints)
@@ -124,6 +134,10 @@ onMounted(() => {
 
   contentLayer.value = L.layerGroup().addTo(map.value)
 
+  poiLayer.value = L.layerGroup().addTo(map.value)
+
+  spotsLayer.value = L.layerGroup().addTo(map.value)
+
   depthLayer.value = L.featureGroup()
 
   if (depthLayerVisible.value) {
@@ -132,12 +146,12 @@ onMounted(() => {
 
   // В bottom-углах Leaflet вставляет контролы сверху: первый добавленный оказывается в самом низу
   createButtonControl({
-    icon: () => (isDark.value ? '☀️' : '🌙'),
+    icon: () => (isDark.value ? Sun : Moon),
     title: () => (isDark.value ? 'Светлая тема' : 'Тёмная тема'),
     onClick: toggleColorScheme,
   }).addTo(map.value)
 
-  createButtonControl({ icon: '⚙️', title: 'Настройки', onClick: () => (showSettingsModal.value = true) }).addTo(
+  createButtonControl({ icon: Settings, title: 'Настройки', onClick: () => (showSettingsModal.value = true) }).addTo(
     map.value,
   )
 
@@ -172,7 +186,7 @@ onMounted(() => {
 
   initRuler(map.value)
 
-  createButtonControl({ icon: '📏', title: 'Линейка', active: rulerActive, onClick: toggleRuler }).addTo(map.value)
+  createButtonControl({ icon: Ruler, title: 'Линейка', active: rulerActive, onClick: toggleRuler }).addTo(map.value)
 
   const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxNativeZoom: 19,
@@ -192,12 +206,26 @@ onMounted(() => {
 
   ;(isDark.value ? darkLayer : osmLayer).addTo(map.value)
 
-  let layerControl = L.control
-    .layers({
-      Карта: isDark.value ? darkLayer : osmLayer,
-      Спутник: googleSatelliteLayer,
-    })
-    .addTo(map.value!)
+  // ponytail: подписи маршрутов — bindTooltip на полилиниях, отдельным слоем их не вынести.
+  // Пустой слой-переключатель: чекбокс в контроле слоёв прячет их через класс на контейнере карты.
+  const container = map.value.getContainer()
+
+  const labelsLayer = L.layerGroup()
+    .on('add', () => container.classList.remove('map--no-route-labels'))
+    .on('remove', () => container.classList.add('map--no-route-labels'))
+    .addTo(map.value)
+
+  const overlays = {
+    Маршруты: contentLayer.value,
+    Подписи: labelsLayer,
+    POI: poiLayer.value,
+    Споты: spotsLayer.value,
+  }
+
+  const buildLayerControl = (dark: boolean) =>
+    L.control.layers({ Карта: dark ? darkLayer : osmLayer, Спутник: googleSatelliteLayer }, overlays).addTo(map.value!)
+
+  let layerControl = buildLayerControl(isDark.value)
 
   watch(isDark, (dark) => {
     if (!map.value) {
@@ -214,12 +242,7 @@ onMounted(() => {
 
     map.value.removeControl(layerControl)
 
-    layerControl = L.control
-      .layers({
-        Карта: dark ? darkLayer : osmLayer,
-        Спутник: googleSatelliteLayer,
-      })
-      .addTo(map.value)
+    layerControl = buildLayerControl(dark)
   })
 })
 
@@ -437,6 +460,14 @@ useHead({
   box-shadow: none;
 }
 
+/* Цель клика — всегда <a>, а не svg внутри. Иначе Vue перерисовывает иконку между
+   слушателями клика, svg отрывается от DOM, и Leaflet не видит disableClickPropagation
+   по цепочке parentNode — клик по кнопке долетает до карты. */
+.map-button__button svg,
+.depth-toggle__button svg {
+  pointer-events: none;
+}
+
 .map-button__button {
   display: flex !important;
   align-items: center;
@@ -458,10 +489,72 @@ useHead({
   background: #1f2937;
 }
 
+.map--no-route-labels .route-label {
+  display: none;
+}
+
+.map-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .ruler-label {
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.ruler-node {
+  background: #ffffff;
+  border: 2px solid #1f9e89;
+  border-radius: 50%;
+  box-sizing: border-box;
+}
+
+.leaflet-marker-draggable.ruler-node {
+  cursor: grab;
+}
+
+.ruler-label__delete {
+  cursor: pointer;
+  color: #dc2626;
+}
+
+/* Прицел — тонкий крест без кольца, чтобы не путать с узлом линии */
+.ruler-crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40px;
+  height: 40px;
+  margin: -20px 0 0 -20px;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.ruler-crosshair::before,
+.ruler-crosshair::after {
+  content: '';
+  position: absolute;
+  background: #1f9e89;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.8);
+}
+
+.ruler-crosshair::before {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+}
+
+.ruler-crosshair::after {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  margin-top: -1px;
 }
 
 .marker--preview {

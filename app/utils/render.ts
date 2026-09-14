@@ -8,6 +8,7 @@ export function renderRouteGroups(contentLayer: LayerGroup, routeGroupProxies: R
 
 export function renderRoutes(
   contentLayer: LayerGroup,
+  poiLayer: LayerGroup,
   routeGroupProxies: Record<number, RouteGroupProxy>,
   routes: IAPIRoute[],
 ): void {
@@ -33,7 +34,7 @@ export function renderRoutes(
       if (route.routeGroupId) {
         polyline.bindPopup(tooltip)
       } else {
-        polyline.bindTooltip(tooltip, { permanent: true })
+        polyline.bindTooltip(tooltip, { permanent: true, className: 'route-label' })
       }
     }
 
@@ -43,12 +44,20 @@ export function renderRoutes(
       polyline.addTo(contentLayer)
     }
 
-    renderRouteWaypoints(contentLayer, color, route.waypoints)
+    renderRouteWaypoints(contentLayer, poiLayer, color, route.waypoints)
   })
 }
 
-export function renderRouteWaypoints(contentLayer: LayerGroup, routeColor: string, waypoints: IAPIWaypoint[]): void {
+// POI-точки уходят в отдельный слой, чтобы их можно было скрывать независимо от маршрутов
+export function renderRouteWaypoints(
+  contentLayer: LayerGroup,
+  poiLayer: LayerGroup,
+  routeColor: string,
+  waypoints: IAPIWaypoint[],
+): void {
   waypoints.forEach((waypoint) => {
+    const target = waypoint.poi ? poiLayer : contentLayer
+
     const marker = L.circleMarker([waypoint.lat, waypoint.lng], {
       ...getWaypointCircleMarkerOptions(routeColor, waypoint),
       pane: 'markers',
@@ -60,7 +69,7 @@ export function renderRouteWaypoints(contentLayer: LayerGroup, routeColor: strin
       marker.bindTooltip(tooltip)
     }
 
-    marker.addTo(contentLayer)
+    marker.addTo(target)
 
     if (waypoint.emoji) {
       const [emojiLat, emojiLng] = forwardOffset(
@@ -84,7 +93,7 @@ export function renderRouteWaypoints(contentLayer: LayerGroup, routeColor: strin
         emojiMarker.bindTooltip(tooltip)
       }
 
-      emojiMarker.addTo(contentLayer)
+      emojiMarker.addTo(target)
     }
   })
 }

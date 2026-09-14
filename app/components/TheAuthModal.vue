@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { X } from 'lucide'
+
 const emit = defineEmits<{ success: [], close: [] }>()
 
 const { authorize } = useAuth()
@@ -41,11 +43,11 @@ async function submit() {
     >
       <button
         type="button"
-        class="absolute top-2 right-2 cursor-pointer text-lg leading-none text-gray-400 hover:text-gray-700 dark:hover:text-white"
+        class="absolute top-2 right-2 cursor-pointer text-gray-400 hover:text-gray-700 dark:hover:text-white"
         aria-label="Закрыть"
         @click="emit('close')"
       >
-        ×
+        <LucideIcon :icon="X" />
       </button>
 
       <div class="text-sm font-medium text-gray-900 dark:text-white">Введите код доступа</div>

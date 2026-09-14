@@ -1,5 +1,7 @@
 import L from 'leaflet'
 
+import { WavesArrowDown } from 'lucide'
+
 interface CreateDepthToggleControlOptions {
   initialVisible: boolean
   onToggle: (visible: boolean) => void
@@ -20,7 +22,7 @@ export function createDepthToggleControl({ initialVisible, onToggle }: CreateDep
 
       button.setAttribute('role', 'button')
 
-      button.textContent = '💧'
+      button.replaceChildren(renderIcon(WavesArrowDown))
 
       const legend = L.DomUtil.create('div', 'depth-toggle__legend', container)
 

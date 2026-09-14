@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { ArrowLeft, LogOut, X } from 'lucide'
+
 defineProps<{
   title: string
   subtitle?: string
@@ -20,10 +22,11 @@ function onLogout() {
     <div class="flex min-w-0 items-center gap-2">
       <button
         v-if="view !== 'home'"
-        class="shrink-0 cursor-pointer text-sm text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+        class="shrink-0 cursor-pointer text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+        title="Назад"
         @click="back"
       >
-        ←
+        <LucideIcon :icon="ArrowLeft" />
       </button>
       <div class="min-w-0">
         <div class="text-sm font-medium">
@@ -40,17 +43,18 @@ function onLogout() {
     <div class="ml-2 flex shrink-0 items-center gap-2">
       <button
         v-if="authorized"
-        class="cursor-pointer text-xs text-gray-500 hover:text-black dark:hover:text-white"
+        class="cursor-pointer text-gray-500 hover:text-black dark:hover:text-white"
         title="Выйти"
         @click="onLogout"
       >
-        🏃🚪
+        <LucideIcon :icon="LogOut" />
       </button>
       <button
-        class="cursor-pointer text-lg leading-none text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+        class="cursor-pointer text-gray-600 hover:text-black dark:text-gray-400 dark:hover:text-white"
+        title="Закрыть"
         @click="close"
       >
-        ✕
+        <LucideIcon :icon="X" />
       </button>
     </div>
   </div>

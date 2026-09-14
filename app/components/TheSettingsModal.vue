@@ -1,13 +1,16 @@
 <script lang="ts" setup>
+import { X } from 'lucide'
+
 const emit = defineEmits<{ close: [] }>()
 
 const { speed } = useSettings()
 
-const form = ref<number | null>(speed.value)
+// В UI — м/мин (так дайверу привычнее), внутри и в API — м/с
+const form = ref<number | null>(Math.round(speed.value * 60 * 10) / 10)
 
 function submit() {
   // Пустое поле = вернуться к скорости по умолчанию
-  speed.value = form.value ?? DIVER_SPEED_MULTIPLIER
+  speed.value = form.value ? form.value / 60 : DIVER_SPEED_MULTIPLIER
 
   emit('close')
 }
@@ -24,21 +27,21 @@ function submit() {
     >
       <button
         type="button"
-        class="absolute top-2 right-2 cursor-pointer text-lg leading-none text-gray-400 hover:text-gray-700 dark:hover:text-white"
+        class="absolute top-2 right-2 cursor-pointer text-gray-400 hover:text-gray-700 dark:hover:text-white"
         aria-label="Закрыть"
         @click="emit('close')"
       >
-        ×
+        <LucideIcon :icon="X" />
       </button>
 
       <div class="text-sm font-medium">Настройки</div>
 
       <FieldNumber
         v-model="form"
-        label="Скорость, м/с"
-        :min="0.01"
-        :step="0.01"
-        :placeholder="String(DIVER_SPEED_MULTIPLIER)"
+        label="Скорость, м/мин"
+        :min="1"
+        :step="1"
+        :placeholder="String(DIVER_SPEED_MULTIPLIER * 60)"
       />
 
       <FieldNumber
